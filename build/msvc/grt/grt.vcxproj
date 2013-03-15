@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1C32F3BE-98A6-46DC-9F20-F697895378D5}</ProjectGuid>
+    <RootNamespace>grt</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>..\..\..\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>..\..\..\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS -_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS -_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\common\charrange.h" />
+    <ClInclude Include="..\..\..\include\common\shared.h" />
+    <ClInclude Include="..\..\..\include\common\uncopyable.h" />
+    <ClInclude Include="..\..\..\include\core\device.h" />
+    <ClInclude Include="..\..\..\include\core\indexbuffer.h" />
+    <ClInclude Include="..\..\..\include\core\renderstate.h" />
+    <ClInclude Include="..\..\..\include\core\rendertarget.h" />
+    <ClInclude Include="..\..\..\include\core\shaderprogram.h" />
+    <ClInclude Include="..\..\..\include\core\texture.h" />
+    <ClInclude Include="..\..\..\include\core\texturetarget.h" />
+    <ClInclude Include="..\..\..\include\core\uniform.h" />
+    <ClInclude Include="..\..\..\include\core\vertexbuffer.h" />
+    <ClInclude Include="..\..\..\include\input\input.h" />
+    <ClInclude Include="..\..\..\include\input\inputevent.h" />
+    <ClInclude Include="..\..\..\include\input\keyboard.h" />
+    <ClInclude Include="..\..\..\include\input\keys.h" />
+    <ClInclude Include="..\..\..\include\input\time.h" />
+    <ClInclude Include="..\..\..\include\math\mat22.h" />
+    <ClInclude Include="..\..\..\include\math\mat33.h" />
+    <ClInclude Include="..\..\..\include\math\mat44.h" />
+    <ClInclude Include="..\..\..\include\math\perlin.h" />
+    <ClInclude Include="..\..\..\include\math\vec.h" />
+    <ClInclude Include="..\..\..\include\math\vec2.h" />
+    <ClInclude Include="..\..\..\include\math\vec3.h" />
+    <ClInclude Include="..\..\..\include\math\vec4.h" />
+    <ClInclude Include="..\..\..\include\opengl\gl3.h" />
+    <ClInclude Include="..\..\..\include\opengl\gl3w.h" />
+    <ClInclude Include="..\..\..\include\opengl\opengl.h" />
+    <ClInclude Include="..\..\..\include\resource\font.h" />
+    <ClInclude Include="..\..\..\include\resource\light.h" />
+    <ClInclude Include="..\..\..\include\resource\material.h" />
+    <ClInclude Include="..\..\..\include\resource\mesh.h" />
+    <ClInclude Include="..\..\..\include\resource\pprenderer.h" />
+    <ClInclude Include="..\..\..\include\resource\resourcepool.h" />
+    <ClInclude Include="..\..\..\include\resource\scenenode.h" />
+    <ClInclude Include="..\..\..\include\resource\textureatlas.h" />
+    <ClInclude Include="..\..\..\include\resource\voxelbox.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\common\charrange.cpp" />
+    <ClCompile Include="..\..\..\src\core\renderstate.cpp" />
+    <ClCompile Include="..\..\..\src\core\rendertarget.cpp" />
+    <ClCompile Include="..\..\..\src\core\shaderprogram.cpp" />
+    <ClCompile Include="..\..\..\src\core\texture.cpp" />
+    <ClCompile Include="..\..\..\src\core\texturetarget.cpp" />
+    <ClCompile Include="..\..\..\src\core\uniform.cpp" />
+    <ClCompile Include="..\..\..\src\core\vertexbuffer.cpp" />
+    <ClCompile Include="..\..\..\src\external\stb_image.cpp" />
+    <ClCompile Include="..\..\..\src\math\perlin.cpp" />
+    <ClCompile Include="..\..\..\src\resource\font.cpp" />
+    <ClCompile Include="..\..\..\src\resource\material.cpp" />
+    <ClCompile Include="..\..\..\src\resource\mesh.cpp" />
+    <ClCompile Include="..\..\..\src\resource\pprenderer.cpp" />
+    <ClCompile Include="..\..\..\src\resource\resourcepool.cpp" />
+    <ClCompile Include="..\..\..\src\resource\scenenode.cpp" />
+    <ClCompile Include="..\..\..\src\resource\textureatlas.cpp" />
+    <ClCompile Include="..\..\..\src\resource\voxelbox.cpp" />
+    <ClCompile Include="..\..\..\src\windows\device_win.cpp" />
+    <ClCompile Include="..\..\..\src\windows\gl3w.c" />
+    <ClCompile Include="..\..\..\src\windows\input_win.cpp" />
+    <ClCompile Include="..\..\..\src\windows\time_win.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
