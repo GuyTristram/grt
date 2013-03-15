@@ -122,22 +122,29 @@ void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
 	m_quad.draw( *m_hdr_program, rs_quad, device );
 }
 
-void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
+void PPRenderer::render( Device &device,
                          float44 const &world_from_camera,
 						 float44 const &projected_from_camera,
-				         std::vector< Light > &lights )
+                         SceneNode &root )
 {
+	m_lights.clear();
+	m_meshes.clear();
+
+	visit_scene( root, *this );
 
 	float44 camera_from_world = inverse( world_from_camera );
 	float44 projected_from_world = projected_from_camera * camera_from_world;
 
-	m_gbuf_program->set( material.uniforms );
 	m_gbuf_program->set( "u_t_model_view_projection",  projected_from_world );
 	m_gbuf_program->set( "u_t_normal", float33() );
 	
 	m_gbuf_target->clear(true, true);
 
-	mesh.draw( *m_gbuf_program, *RenderState::stock_opaque(), *m_gbuf_target );
+	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
+	{
+		m_gbuf_program->set( (*m)->material->uniforms );
+		(*m)->mesh.draw( *m_gbuf_program, *RenderState::stock_opaque(), *m_gbuf_target );
+	}
 
 
 	// Render lights into light target
@@ -154,18 +161,18 @@ void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
 	m_light_sh_program->set( "u_eye_position", world_from_camera.t );
 	m_light_sh_program->set( "u_world_from_projected", inverse( projected_from_world ) );
 
-	for( int i = 0; i != lights.size(); ++i )
+	for( int i = 0; i != m_lights.size(); ++i )
 	{
-		update_light( lights[i], mesh );
-		m_light_sh_program->set( "u_light_position", lights[i].position );
-		m_light_sh_program->set( "u_light_colour", lights[i].colour );
-		m_light_sh_program->set( "u_light_radius2rec", 1.f / (lights[i].radius * lights[i].radius) );
-		m_light_sh_program->set( "u_shadow", lights[i].shadow_map );
-		m_light_sh_program->set( "u_near", lights[i].radius / 100.f );
-		m_light_sh_program->set( "u_far", lights[i].radius );
-		float s = lights[i].radius;
+		update_light( *m_lights[i] );
+		m_light_sh_program->set( "u_light_position", m_lights[i]->position );
+		m_light_sh_program->set( "u_light_colour", m_lights[i]->colour );
+		m_light_sh_program->set( "u_light_radius2rec", 1.f / (m_lights[i]->radius * m_lights[i]->radius) );
+		m_light_sh_program->set( "u_shadow", m_lights[i]->shadow_map );
+		m_light_sh_program->set( "u_near", m_lights[i]->radius / 100.f );
+		m_light_sh_program->set( "u_far", m_lights[i]->radius );
+		float s = m_lights[i]->radius;
 		float44 projected_from_model = projected_from_world *
-		                               translation( lights[i].position ) *
+		                               translation( m_lights[i]->position ) *
 		                               scale( float4( s, s, s, 1.f ) );
 		m_light_sh_program->set( "u_projected_from_model",  projected_from_model );
 		m_icosohedron.draw( *m_light_sh_program, rs_light, *m_light_target );
@@ -178,13 +185,16 @@ void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
 	rs_material.depth_test( true );
 	rs_material.depth_write( false );
 
-	m_shade_program->set( material.uniforms );
 	m_shade_program->set( m_shade_uniforms );
 	m_shade_program->set( "u_t_model_view_projection",  projected_from_world );
 
 	m_hdr_target->clear( true, false );
 
-	mesh.draw( *m_shade_program, rs_material, *m_hdr_target );
+	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
+	{
+		m_shade_program->set( (*m)->material->uniforms );
+		(*m)->mesh.draw( *m_shade_program, rs_material, *m_hdr_target );
+	}
 
 
 	// Render final image
@@ -200,7 +210,7 @@ void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
 	m_quad.draw( *m_hdr_program, rs_quad, device );
 }
 
-void PPRenderer::update_light( Light &light, Mesh &mesh )
+void PPRenderer::update_light( SceneLight &light )
 {
 	if( light.dirty )
 	{
@@ -225,9 +235,22 @@ void PPRenderer::update_light( Light &light, Mesh &mesh )
 			m_shadow_target->clear( false, true );
 			float44 face_from_world = look_at( light.position, light.position + dir[i], up[i] );
 			m_shadow_program->set( "u_projected_from_model", proj * inverse( face_from_world ) );
-			mesh.draw( *m_shadow_program, m_shadow_state, *m_shadow_target );
+			for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
+			{
+				(*m)->mesh.draw( *m_shadow_program, m_shadow_state, *m_shadow_target );
+			}
 		}
 		light.dirty = false;
 		light.shadow_map->gen_mipmaps();
 	}
+}
+
+void PPRenderer::visit( SceneMesh &mesh )
+{
+	m_meshes.push_back( &mesh );
+}
+
+void PPRenderer::visit( SceneLight &light )
+{
+	m_lights.push_back( &light );
 }

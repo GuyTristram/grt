@@ -16,8 +16,6 @@ struct Light// : public Shared
 		dirty( true ),
 		casts_shadows( true ) {}
 
-	void update( Mesh &mesh );
-
 	float4 position;
 	float4 colour;
 	float radius;

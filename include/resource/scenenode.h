@@ -8,18 +8,20 @@
 
 #include <vector>
 
+class TextureCube;
+
 class SceneNode;
-class SceneNodeMesh;
-class SceneNodeLight;
-class SceneNodeCamera;
+class SceneMesh;
+class SceneLight;
+class SceneCamera;
 
 class SceneNodeVisitor
 {
 public:
 	virtual void visit( SceneNode & ) {}
-	virtual void visit( SceneNodeMesh & ) {}
-	virtual void visit( SceneNodeLight & ) {}
-	virtual void visit( SceneNodeCamera & ) {}
+	virtual void visit( SceneMesh & ) {}
+	virtual void visit( SceneLight & ) {}
+	virtual void visit( SceneCamera & ) {}
 };
 
 
@@ -65,11 +67,35 @@ private:
 };
 
 
-class SceneNodeMesh : public SceneNode
+class SceneMesh : public SceneNode
 {
 public:
+	typedef SharedPtr< SceneMesh > Ptr;
+
 	Mesh          mesh;
 	Material::Ptr material;
+
+	virtual void accept( SceneNodeVisitor &visitor );
+};
+
+class SceneLight : public SceneNode
+{
+public:
+	typedef SharedPtr< SceneLight > Ptr;
+
+	SceneLight() :
+		position( 0.f, 0.f, 0.f, 1.f ),
+		colour( 10.f, 10.f, 10.f, 10.f ),
+		radius( 20.f ),
+		dirty( true ),
+		casts_shadows( true ) {}
+
+	float4 position;
+	float4 colour;
+	float radius;
+	bool dirty;
+	bool casts_shadows;
+	SharedPtr< TextureCube > shadow_map;
 
 	virtual void accept( SceneNodeVisitor &visitor );
 };

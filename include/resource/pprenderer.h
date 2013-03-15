@@ -10,6 +10,7 @@
 #include "math/mat33.h"
 
 #include "resource/mesh.h"
+#include "resource/scenenode.h"
 
 class Device;
 class Material;
@@ -19,7 +20,7 @@ class TextureTarget;
 class Texture2D;
 struct Light;
 
-class PPRenderer
+class PPRenderer : public SceneNodeVisitor
 {
 public:
 	PPRenderer( Device &device, ResourcePool &pool );
@@ -30,12 +31,14 @@ public:
 				 std::vector< float4 > const &light_positions,
 				 std::vector< float > const &light_intensities );
 
-	void render( Device &device, Mesh &mesh, Material &material,
-	             float44 const &cam_pos, float44 const &cam_pers,
-				 std::vector< Light > &lights );
+	void render( Device &device, float44 const &cam_pos, float44 const &cam_pers,
+				 SceneNode &root );
+
+	virtual void visit( SceneMesh &mesh );
+	virtual void visit( SceneLight &light );
 
 private:
-	void update_light( Light &light, Mesh &mesh );
+	void update_light( SceneLight &light );
 
 	SharedPtr< ShaderProgram > m_gbuf_program;
 	SharedPtr< ShaderProgram > m_light_program;
@@ -58,6 +61,9 @@ private:
 	Mesh m_icosohedron;
 
 	RenderState m_shadow_state;
+
+	std::vector< SceneLight * > m_lights;
+	std::vector< SceneMesh * > m_meshes;
 };
 
 

@@ -28,8 +28,7 @@ void SceneNode::set_parent( SceneNode *parent )
 	if( m_parent )
 	{
 		m_parent->m_children.push_back( p );
-		if( m_parent->m_dirty )
-			set_dirty();
+		set_dirty();
 	}
 }
 
@@ -88,7 +87,12 @@ void SceneNodePosition::modify_transform()
 	m_world_from_model.t = m_world_from_model * m_position;
 }
 
-void SceneNodeMesh::accept( SceneNodeVisitor &visitor )
+void SceneMesh::accept( SceneNodeVisitor &visitor )
+{
+	visitor.visit( *this );
+}
+
+void SceneLight::accept( SceneNodeVisitor &visitor )
 {
 	visitor.visit( *this );
 }
