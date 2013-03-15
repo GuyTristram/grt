@@ -5,7 +5,7 @@
 
 namespace
 {
-   std::set< UniformInfo > g_uniform_info;
+std::set< UniformInfo > g_uniform_info;
 }
 
 bool UniformInfo::operator<( UniformInfo const &id2 ) const
@@ -18,27 +18,27 @@ bool UniformInfo::operator<( UniformInfo const &id2 ) const
 
 UniformInfo const *UniformInfo::get( char const *name, int type )
 {
-    UniformInfo id;
-    id.name = name;
-    id.type = type;
-    id.count = 1;
-    id.location = -1;
-    id.texture_unit = -1;
+	UniformInfo id;
+	id.name = name;
+	id.type = type;
+	id.count = 1;
+	id.location = -1;
+	id.texture_unit = -1;
 
 	auto loc = g_uniform_info.find( id );
 	if( loc != g_uniform_info.end() )
-		return &(*loc);
-    
+		return &( *loc );
+
 	auto new_info = g_uniform_info.insert( id );
-	return &(*new_info.first);
+	return &( *new_info.first );
 }
 
 UniformBase *UniformGroup::get( char const *name, int type, bool is_array )
 {
 	for( auto uni = m_uniforms.begin(); uni != m_uniforms.end(); ++uni )
-		if( (*uni)->info->name == name &&
-			(*uni)->info->type == type &&
-			(*uni)->is_array   == is_array ) return uni->get();
+		if( ( *uni )->info->name == name &&
+		        ( *uni )->info->type == type &&
+		        ( *uni )->is_array   == is_array ) return uni->get();
 
 	return 0;
 }
@@ -47,5 +47,5 @@ UniformBase *UniformGroup::get( char const *name, int type, bool is_array )
 void UniformGroup::bind() const
 {
 	for( auto uni = m_uniforms.begin(); uni != m_uniforms.end(); ++uni )
-		(*uni)->bind();
+		( *uni )->bind();
 }

@@ -13,11 +13,11 @@ public:
 	typedef SharedPtr< RenderBuffer > Ptr;
 	enum Format
 	{
-		RGBA_4444,
-		//RGB_565,
-		RGBA_5551,
-		Depth,
-		Stencil
+	    RGBA_4444,
+	    //RGB_565,
+	    RGBA_5551,
+	    Depth,
+	    Stencil
 	};
 	RenderBuffer( int width, int height, Format format );
 	~RenderBuffer();
@@ -37,9 +37,9 @@ public:
 
 	enum BufferType
 	{
-		Colour,
-		Depth,
-		Stencil
+	    Colour,
+	    Depth,
+	    Stencil
 	};
 
 	void attach( SharedPtr<Texture2D> const &texture, BufferType type = Colour, int position = 0 );

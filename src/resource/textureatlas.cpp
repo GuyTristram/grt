@@ -30,7 +30,7 @@ TextureAtlas::TextureAtlas( std::vector< std::string > const &sources,
 		{
 			printf( "Error: failed to load texture %s \n", sources[i].c_str() );
 			const unsigned char c = 255;
-			t = Texture2D::Ptr( new Texture2D( 1, 1, 1, 0, (const char *)&c ) );
+			t = Texture2D::Ptr( new Texture2D( 1, 1, 1, 0, ( const char * )&c ) );
 		}
 		textures.push_back( t );
 		sizes[i] = SizeSrc( int2( std::min( t->width(),  max_source_size ),
@@ -46,8 +46,8 @@ TextureAtlas::TextureAtlas( std::vector< std::string > const &sources,
 	int atlas_height = 16;
 
 	while( atlas_width  <= max_atlas_size &&
-	       atlas_height <= max_atlas_size &&
-		   !fit_all( sizes, atlas_width, atlas_height ) )
+	        atlas_height <= max_atlas_size &&
+	        !fit_all( sizes, atlas_width, atlas_height ) )
 	{
 		if( atlas_width <= atlas_height )
 			atlas_width *= 2;
@@ -58,7 +58,7 @@ TextureAtlas::TextureAtlas( std::vector< std::string > const &sources,
 	//Texture2D::Ptr t = ResourcePool::stock().texture2d( "../src/stone3.jpg" );
 
 	if( atlas_width  <= max_atlas_size &&
-	    atlas_height <= max_atlas_size )
+	        atlas_height <= max_atlas_size )
 	{
 		//m_texture.set( new Texture2D( atlas_width, atlas_height, n_channels ) );
 		m_texture = Texture2D::Ptr( new Texture2D( atlas_width, atlas_height, n_channels ) );
@@ -112,7 +112,7 @@ bool TextureAtlas::fit_all( std::vector< SizeSrc > const &sizes, int atlas_width
 			}
 		}
 		if( !fit ) return false;
- 	}
+	}
 	return true;
 }
 

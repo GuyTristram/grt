@@ -5,18 +5,18 @@
 
 namespace
 {
-	GLenum fromFormat( RenderBuffer::Format format )
+GLenum fromFormat( RenderBuffer::Format format )
+{
+	switch( format )
 	{
-		switch( format )
-		{
-		case RenderBuffer::RGBA_4444: return GL_RGBA4;
+	case RenderBuffer::RGBA_4444: return GL_RGBA4;
 		//case RenderBuffer::RGB_565:   return GL_RGB565;
-		case RenderBuffer::RGBA_5551: return GL_RGB5_A1;
-		case RenderBuffer::Depth:     return GL_DEPTH_COMPONENT16;
-		case RenderBuffer::Stencil:   return GL_STENCIL_INDEX8;
-		}
-		return 0;
-	};
+	case RenderBuffer::RGBA_5551: return GL_RGB5_A1;
+	case RenderBuffer::Depth:     return GL_DEPTH_COMPONENT16;
+	case RenderBuffer::Stencil:   return GL_STENCIL_INDEX8;
+	}
+	return 0;
+};
 }
 
 RenderBuffer::RenderBuffer( int width, int height, Format format )
@@ -33,7 +33,7 @@ RenderBuffer::RenderBuffer( int width, int height, Format format )
 RenderBuffer::~RenderBuffer()
 {
 	if( m_id )
-		glDeleteRenderbuffers(1, &m_id);
+		glDeleteRenderbuffers( 1, &m_id );
 }
 
 TextureTarget::TextureTarget()
@@ -50,69 +50,69 @@ TextureTarget::~TextureTarget()
 bool TextureTarget::is_complete()
 {
 	bind();
-	GLenum res = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    switch(res)
-    {
-    case GL_FRAMEBUFFER_COMPLETE:
-        return true;
+	GLenum res = glCheckFramebufferStatus( GL_FRAMEBUFFER );
+	switch( res )
+	{
+	case GL_FRAMEBUFFER_COMPLETE:
+		return true;
 
-    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-        printf( "[ERROR] Framebuffer incomplete: Attachment is NOT complete.\n" );
-        return false;
+	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+		printf( "[ERROR] Framebuffer incomplete: Attachment is NOT complete.\n" );
+		return false;
 
-    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-        printf( "[ERROR] Framebuffer incomplete: No image is attached to FBO.\n" );
-        return false;
-/*
-    case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-        printf( "[ERROR] Framebuffer incomplete: Attached images have different dimensions.\n" );
-        return false;
+	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+		printf( "[ERROR] Framebuffer incomplete: No image is attached to FBO.\n" );
+		return false;
+		/*
+		    case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+		        printf( "[ERROR] Framebuffer incomplete: Attached images have different dimensions.\n" );
+		        return false;
 
-    case GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
-        printf( "[ERROR] Framebuffer incomplete: Color attached images have different internal formats.\n" );
-        return false;
-*/
-    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-        printf( "[ERROR] Framebuffer incomplete: Draw buffer.\n" );
-        return false;
+		    case GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
+		        printf( "[ERROR] Framebuffer incomplete: Color attached images have different internal formats.\n" );
+		        return false;
+		*/
+	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+		printf( "[ERROR] Framebuffer incomplete: Draw buffer.\n" );
+		return false;
 
-    case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-        printf( "[ERROR] Framebuffer incomplete: Read buffer.\n" );
-        return false;
+	case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+		printf( "[ERROR] Framebuffer incomplete: Read buffer.\n" );
+		return false;
 
-    case GL_FRAMEBUFFER_UNSUPPORTED:
-        printf( "[ERROR] Framebuffer incomplete: Unsupported by FBO implementation.\n" );
-        return false;
+	case GL_FRAMEBUFFER_UNSUPPORTED:
+		printf( "[ERROR] Framebuffer incomplete: Unsupported by FBO implementation.\n" );
+		return false;
 
-    default:
-        printf( "[ERROR] Framebuffer incomplete: Unknown error.\n" );
-        return false;
-    }
+	default:
+		printf( "[ERROR] Framebuffer incomplete: Unknown error.\n" );
+		return false;
+	}
 }
 
 namespace
 {
-	GLenum attachment( TextureTarget::BufferType type, int position )
+GLenum attachment( TextureTarget::BufferType type, int position )
+{
+	switch( type )
 	{
-		switch( type )
-		{
-		case TextureTarget::Colour:  return GL_COLOR_ATTACHMENT0 + position;
-		case TextureTarget::Depth:   return GL_DEPTH_ATTACHMENT;
-		case TextureTarget::Stencil: return GL_STENCIL_ATTACHMENT;
-		}
-		return 0;
+	case TextureTarget::Colour:  return GL_COLOR_ATTACHMENT0 + position;
+	case TextureTarget::Depth:   return GL_DEPTH_ATTACHMENT;
+	case TextureTarget::Stencil: return GL_STENCIL_ATTACHMENT;
 	}
+	return 0;
+}
 
-	int index( TextureTarget::BufferType type, int position )
+int index( TextureTarget::BufferType type, int position )
+{
+	switch( type )
 	{
-		switch( type )
-		{
-		case TextureTarget::Depth:   return 0;
-		case TextureTarget::Stencil: return 1;
-		case TextureTarget::Colour:  return 2 + position;
-		}
-		return 0;
+	case TextureTarget::Depth:   return 0;
+	case TextureTarget::Stencil: return 1;
+	case TextureTarget::Colour:  return 2 + position;
 	}
+	return 0;
+}
 }
 
 int TextureTarget::width() const
@@ -146,7 +146,8 @@ void TextureTarget::attach( SharedPtr<TextureCube> const &texture, int face, Buf
 	GLuint id = texture.get() ? texture->m_id : 0;
 	GLenum target[6] = { GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
 	                     GL_TEXTURE_CUBE_MAP_POSITIVE_Y, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-						 GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
+	                     GL_TEXTURE_CUBE_MAP_POSITIVE_Z, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+	                   };
 	glFramebufferTexture2D( GL_FRAMEBUFFER, attachment( type, position ), target[ face ], id, 0 );
 	m_buffer[ index( type, position ) ] = texture;
 	unbind();
@@ -163,5 +164,5 @@ void TextureTarget::attach( SharedPtr<RenderBuffer> const &buffer, BufferType ty
 
 void TextureTarget::do_bind()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_id);
+	glBindFramebuffer( GL_FRAMEBUFFER, m_id );
 }

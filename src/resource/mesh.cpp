@@ -1,6 +1,6 @@
 #include "resource/mesh.h"
 
-void Mesh::draw(  ShaderProgram &sp, RenderState &rs, RenderTarget &rt )
+void Mesh::draw( ShaderProgram &sp, RenderState &rs, RenderTarget &rt )
 {
 	if( ib.get() )
 		rt.draw( sp, rs, type, *vb, *ib );

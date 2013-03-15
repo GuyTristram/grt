@@ -1,7 +1,7 @@
 #ifndef UNIFORM_H
 #define UNIFORM_H
 
-#include "common/shared.h" 
+#include "common/shared.h"
 #include "core/texture.h"
 #include "math/vec.h"
 
@@ -13,16 +13,16 @@
 
 struct UniformInfo
 {
-    std::string name;
-    int type;
+	std::string name;
+	int type;
 
 	// These are set by ShaderProgram::bind() to reflect location etc. of the
 	// uniform for that program.
 	mutable int location;
-    mutable int count;
+	mutable int count;
 	mutable int texture_unit;
 
-    static UniformInfo const *get( char const *name, int type );
+	static UniformInfo const *get( char const *name, int type );
 
 	// Provided so that UniformInfo objects can be stored in a map
 	bool operator<( UniformInfo const &id2 ) const;
@@ -103,59 +103,59 @@ template<typename T> struct UniformType< std::vector< T > > {static int type() {
 template< typename T >
 struct UniformArrayInfo { static int size( T const & ) {return 1;} static const bool is_array = false;};
 
-template<typename T> struct UniformArrayInfo< std::vector< T > > {static int size(std::vector< T > const &v) {return v.size();} static const bool is_array = true;};
+template<typename T> struct UniformArrayInfo< std::vector< T > > {static int size( std::vector< T > const &v ) {return v.size();} static const bool is_array = true;};
 
 namespace UniformSetters
 {
-	inline void set( int location, float   const &data, int tex_unit, int size ) { glUniform1fv( location, size, &data ); }
-	inline void set( int location, float2  const &data, int tex_unit, int size ) { glUniform2fv( location, size, &data.x );}
-	inline void set( int location, float3  const &data, int tex_unit, int size ) { glUniform3fv( location, size, &data.x ); }
-	inline void set( int location, float4  const &data, int tex_unit, int size ) { glUniform4fv( location, size, &data.x ); }
-	inline void set( int location, float22 const &data, int tex_unit, int size ) { glUniformMatrix2fv( location, size, false, &data.i.x ); }
-	inline void set( int location, float33 const &data, int tex_unit, int size ) { glUniformMatrix3fv( location, size, false, &data.i.x ); }
-	inline void set( int location, float44 const &data, int tex_unit, int size ) { glUniformMatrix4fv( location, size, false, &data.i.x ); }
-	inline void set( int location, int     const &data, int tex_unit, int size ) { glUniform1iv( location, size, &data ); }
+inline void set( int location, float   const &data, int tex_unit, int size ) { glUniform1fv( location, size, &data ); }
+inline void set( int location, float2  const &data, int tex_unit, int size ) { glUniform2fv( location, size, &data.x );}
+inline void set( int location, float3  const &data, int tex_unit, int size ) { glUniform3fv( location, size, &data.x ); }
+inline void set( int location, float4  const &data, int tex_unit, int size ) { glUniform4fv( location, size, &data.x ); }
+inline void set( int location, float22 const &data, int tex_unit, int size ) { glUniformMatrix2fv( location, size, false, &data.i.x ); }
+inline void set( int location, float33 const &data, int tex_unit, int size ) { glUniformMatrix3fv( location, size, false, &data.i.x ); }
+inline void set( int location, float44 const &data, int tex_unit, int size ) { glUniformMatrix4fv( location, size, false, &data.i.x ); }
+inline void set( int location, int     const &data, int tex_unit, int size ) { glUniform1iv( location, size, &data ); }
 
-	template< typename T >
-	inline void set_texture( int location, T const &data, int tex_unit, int size )
+template< typename T >
+inline void set_texture( int location, T const &data, int tex_unit, int size )
+{
+	if( location < 0 )
+		return;
+
+	if( size > 1 )
 	{
-		if( location < 0 )
-			return;
-
-		if( size > 1 )
+		std::vector<int> tex_units( size );
+		T const *tex = &data;
+		for( int i = 0; i < size; ++i )
 		{
-			std::vector<int> tex_units( size );
-			T const *tex = &data;
-			for( int i = 0; i < size; ++i )
-			{
-				tex_units[i] = tex_unit + i;
-				if( tex->get() )
-					(*tex)->bind( tex_unit );
-				++tex;
-			}
-			set( location, tex_units[0], 0, size );
+			tex_units[i] = tex_unit + i;
+			if( tex->get() )
+				( *tex )->bind( tex_unit );
+			++tex;
 		}
-		else
-		{
-			set( location, tex_unit, 0, 1 );
-			if( data.get() )
-				data->bind( tex_unit );
-		}
+		set( location, tex_units[0], 0, size );
 	}
-	inline void set( int location, Texture2D::Ptr const &data, int tex_unit, int size )
+	else
 	{
-		set_texture( location, data, tex_unit, size );
+		set( location, tex_unit, 0, 1 );
+		if( data.get() )
+			data->bind( tex_unit );
 	}
-	inline void set( int location, TextureCube::Ptr const &data, int tex_unit, int size )
-	{
-		set_texture( location, data, tex_unit, size );
-	}
+}
+inline void set( int location, Texture2D::Ptr const &data, int tex_unit, int size )
+{
+	set_texture( location, data, tex_unit, size );
+}
+inline void set( int location, TextureCube::Ptr const &data, int tex_unit, int size )
+{
+	set_texture( location, data, tex_unit, size );
+}
 
-	template< typename T >
-	inline void set( int location, std::vector< T > const &data, int tex_unit, int size )
-	{
-		set( location, data[0], tex_unit, size );
-	}
+template< typename T >
+inline void set( int location, std::vector< T > const &data, int tex_unit, int size )
+{
+	set( location, data[0], tex_unit, size );
+}
 }
 
 UniformBase::UniformBase( char const *name, int type, bool is_array )
@@ -174,7 +174,7 @@ template< typename T >
 void Uniform< T >::bind() const
 {
 	UniformSetters::set( info->location, data, info->texture_unit,
-		                    std::min( UniformArrayInfo< T >::size(data), info->count ) );
+	                     std::min( UniformArrayInfo< T >::size( data ), info->count ) );
 }
 
 template< typename T >

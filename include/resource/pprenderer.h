@@ -1,10 +1,10 @@
 #ifndef PPRENDERER_H
 #define PPRENDERER_H
 
-#include "core/renderstate.h" 
+#include "core/renderstate.h"
 #include "core/uniform.h"
 
-#include "common/shared.h" 
+#include "common/shared.h"
 
 #include "math/mat44.h"
 #include "math/mat33.h"
@@ -28,11 +28,11 @@ public:
 
 	void render( Device &device, Mesh &mesh, Material &material,
 	             float44 const &cam_pos, float44 const &cam_pers,
-				 std::vector< float4 > const &light_positions,
-				 std::vector< float > const &light_intensities );
+	             std::vector< float4 > const &light_positions,
+	             std::vector< float > const &light_intensities );
 
 	void render( Device &device, float44 const &cam_pos, float44 const &cam_pers,
-				 SceneNode &root );
+	             SceneNode &root );
 
 	virtual void visit( SceneMesh &mesh );
 	virtual void visit( SceneLight &light );

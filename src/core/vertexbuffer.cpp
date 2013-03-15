@@ -5,7 +5,7 @@
 
 namespace
 {
-	std::map< std::string, int > g_attribute_locations;
+std::map< std::string, int > g_attribute_locations;
 }
 
 VertexBuffer::~VertexBuffer()
@@ -24,9 +24,9 @@ VertexBuffer::~VertexBuffer()
 void VertexBuffer::add_attribute( char const *name, int type, int count, int size, bool dynamic, bool normalize )
 {
 	m_attributes.push_back( Attribute( attribute_location( name ),
-		                               type, count,
-										dynamic ? m_dynamic_vertex_size : m_static_vertex_size,
-										dynamic, normalize ) );
+	                                   type, count,
+	                                   dynamic ? m_dynamic_vertex_size : m_static_vertex_size,
+	                                   dynamic, normalize ) );
 
 	if( dynamic )
 		m_dynamic_vertex_size += size;
@@ -48,7 +48,7 @@ void VertexBuffer::bind()
 			{
 				glEnableVertexAttribArray( *att->location );
 				glVertexAttribPointer( *att->location, att->count, att->type,
-					                   att->normalize, m_static_vertex_size, 
+				                       att->normalize, m_static_vertex_size,
 				                       reinterpret_cast< GLvoid * >( att->offset ) );
 			}
 		}
@@ -63,8 +63,8 @@ void VertexBuffer::bind()
 			{
 				glEnableVertexAttribArray( *att->location );
 				glVertexAttribPointer( *att->location, att->count, att->type,
-					                   att->normalize, m_dynamic_vertex_size, 
-									   m_dynamic_data + att->offset );
+				                       att->normalize, m_dynamic_vertex_size,
+				                       m_dynamic_data + att->offset );
 			}
 		}
 	}

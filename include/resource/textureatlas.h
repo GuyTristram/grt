@@ -2,7 +2,7 @@
 #define TEXTUREATLAS_H
 
 #include "math/vec2.h"
-#include "common/shared.h" 
+#include "common/shared.h"
 
 #include <vector>
 #include <string>
@@ -24,7 +24,7 @@ public:
 	struct Rect
 	{
 		Rect() : min( 0, 0 ), max( 0, 0 ) {}
-		Rect( int2 min, int2 max ) : min(min), max(max) {}
+		Rect( int2 min, int2 max ) : min( min ), max( max ) {}
 		int2 min; int2 max;
 		int area() const {return ( max.x - min.x ) * ( max.y - min.y );}
 		int2 size() const {return max - min;}
@@ -36,7 +36,7 @@ public:
 	struct SizeSrc
 	{
 		SizeSrc() : size( 0, 0 ), src( 0 ) {}
-		SizeSrc( int2 size, int src ) : size(size), src(src) {}
+		SizeSrc( int2 size, int src ) : size( size ), src( src ) {}
 		bool operator<( SizeSrc const &rs ) const {return size.x * size.y > rs.size.x * rs.size.y;}
 		int2 size;
 		int src;

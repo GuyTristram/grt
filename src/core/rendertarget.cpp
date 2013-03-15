@@ -8,25 +8,25 @@
 
 namespace
 {
-	GLenum gl_primitive( RenderTarget::PrimitiveType type )
+GLenum gl_primitive( RenderTarget::PrimitiveType type )
+{
+	switch( type )
 	{
-		switch( type )
-		{
-		case RenderTarget::Triangles:
-			return GL_TRIANGLES;
-		case RenderTarget::Fan:
-			return GL_TRIANGLE_FAN;
-		case RenderTarget::Strip:
-			return GL_TRIANGLE_STRIP;
-		case RenderTarget::Points:
-			return GL_POINTS;
-		case RenderTarget::Lines:
-			return GL_LINES;
-		}
+	case RenderTarget::Triangles:
 		return GL_TRIANGLES;
+	case RenderTarget::Fan:
+		return GL_TRIANGLE_FAN;
+	case RenderTarget::Strip:
+		return GL_TRIANGLE_STRIP;
+	case RenderTarget::Points:
+		return GL_POINTS;
+	case RenderTarget::Lines:
+		return GL_LINES;
 	}
+	return GL_TRIANGLES;
+}
 
-	RenderTarget *g_current_rendertarget = 0;
+RenderTarget *g_current_rendertarget = 0;
 }
 
 RenderTarget::~RenderTarget()
@@ -73,7 +73,7 @@ void RenderTarget::clear( bool colour, bool depth, bool stencil )
 		glDepthMask( GL_TRUE );
 	}
 
-	glViewport( 0, 0, width(), height());
+	glViewport( 0, 0, width(), height() );
 	glClear( flags );
 }
 
@@ -87,7 +87,7 @@ void RenderTarget::bind()
 	if( g_current_rendertarget != this )
 	{
 		do_bind();
-		glViewport( 0, 0, width(), height());
+		glViewport( 0, 0, width(), height() );
 		g_current_rendertarget = this;
 	}
 }

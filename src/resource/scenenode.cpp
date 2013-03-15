@@ -6,7 +6,7 @@ SceneNode::SceneNode() : m_dirty( false ), m_parent( 0 ) {}
 SceneNode::~SceneNode()
 {
 	for( auto i = begin(); i != end(); ++i )
-		(*i)->m_parent = 0;
+		( *i )->m_parent = 0;
 }
 
 
@@ -73,7 +73,7 @@ void SceneNode::set_dirty()
 	m_dirty = true;
 
 	for( auto i = begin(); i != end(); ++i )
-		(*i)->set_dirty();
+		( *i )->set_dirty();
 }
 
 void SceneNodePosition::set( float4 const &position )

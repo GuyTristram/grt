@@ -10,8 +10,8 @@ struct mat22
 {
 	typedef T scalar;
 	typedef vec2< T > row;
-	mat22() : i(1, 0), j(0,1) {}
-	mat22( row const &i, row const &j) : i(i), j(j) {}
+	mat22() : i( 1, 0 ), j( 0,1 ) {}
+	mat22( row const &i, row const &j ) : i( i ), j( j ) {}
 
 	row &operator[]( int index ) {return *( &i + index );}
 	row const &operator[]( int index ) const {return *( &i + index );}
@@ -21,31 +21,31 @@ struct mat22
 
 typedef mat22< float > float22;
 
-template< typename T >	vec2<T> operator*( mat22<T> const &a, vec2<T> const &b );
-template< typename T >	mat22<T> operator*( mat22<T> const &a, mat22<T> const & b );
-template< typename T >	mat22<T> transpose( mat22<T> const &m );
-template< typename T >	mat22<T> rotate( T angle );
+template< typename T >  vec2<T> operator*( mat22<T> const &a, vec2<T> const &b );
+template< typename T >  mat22<T> operator*( mat22<T> const &a, mat22<T> const & b );
+template< typename T >  mat22<T> transpose( mat22<T> const &m );
+template< typename T >  mat22<T> rotate( T angle );
 
 // Implementation
 
-template< typename T >	vec2<T> operator*( mat22<T> const &a, vec2<T> const &b )
+template< typename T >  vec2<T> operator*( mat22<T> const &a, vec2<T> const &b )
 {
 	return a.i * b.x + a.j * b.y;
 }
 
-template< typename T >	mat22<T> operator*( mat22<T> const &a, mat22<T> const & b )
+template< typename T >  mat22<T> operator*( mat22<T> const &a, mat22<T> const & b )
 {
 	return mat22<T>( a * b.i, a * b.j );
 }
 
-template< typename T >	mat22<T> transpose( mat22<T> const &m )
+template< typename T >  mat22<T> transpose( mat22<T> const &m )
 {
 	return mat22<T>( vec2<T>( m.i.x, m.j.x ),
 	                 vec2<T>( m.i.y, m.j.y ) );
 }
 
 
-template< typename T >	mat22<T> rotate( vec2<T> const &axis, T angle )
+template< typename T >  mat22<T> rotate( vec2<T> const &axis, T angle )
 {
 	vec2<T> a = unit( axis );
 

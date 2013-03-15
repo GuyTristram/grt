@@ -11,14 +11,14 @@ CharRangeFile::CharRangeFile( char const *filename )
 	is.open( filename, ios::binary );
 
 	// get length of file:
-	is.seekg (0, ios::end);
+	is.seekg( 0, ios::end );
 	std::streamoff length = is.tellg();
 	if( length <= 0 )
 		return;
-	is.seekg (0, ios::beg);
+	is.seekg( 0, ios::beg );
 
 	// allocate memory:
-	char *buffer = new char[ unsigned int(length) ];
+	char *buffer = new char[ unsigned int( length ) ];
 
 	// read data as a block:
 	is.read( buffer, length );
@@ -42,10 +42,10 @@ void eat_white( CharRange &range )
 /*
 void require_char( CharRange &range, int ch )
 {
-	eat_white( range );
-	if( range.empty() || *range.begin != ch )
-		throw UnexpectedCharacter();
-	++range;
+    eat_white( range );
+    if( range.empty() || *range.begin != ch )
+        throw UnexpectedCharacter();
+    ++range;
 }
 */
 
@@ -73,8 +73,8 @@ CharRange read_token( CharRange &range )
 	eat_white( range );
 	const char *begin = range.begin;
 	while( !range.empty() &&
-	       !isspace( range.front() ) &&
-	       strchr( "<>\\=/", range.front() ) == 0 )
+	        !isspace( range.front() ) &&
+	        strchr( "<>\\=/", range.front() ) == 0 )
 		++range;
 	return CharRange( begin, range.begin );
 }
@@ -125,7 +125,7 @@ float read_float( CharRange &range, float def )
 		float mul = 0.1f;
 		while( isdigit( range.front() ) && !range.empty() )
 		{
-			mant += (range.front() - '0') * mul;
+			mant += ( range.front() - '0' ) * mul;
 			mul *= 0.1f;
 			++range;
 		}

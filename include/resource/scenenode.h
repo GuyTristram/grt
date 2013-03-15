@@ -50,7 +50,7 @@ protected:
 
 private:
 	virtual void modify_transform();
-	bool m_dirty;	// If a node's m_dirty is true, m_dirty is true for all descendants
+	bool m_dirty;   // If a node's m_dirty is true, m_dirty is true for all descendants
 	std::vector< Ptr > m_children;
 	SceneNode *m_parent;
 };

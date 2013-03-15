@@ -1,8 +1,8 @@
 #include "resource/material.h"
 
 Material::Material( ShaderProgram::Ptr const &program,
-	                RenderState::Ptr const &state)
-	: program( program), state( state ) {}
+                    RenderState::Ptr const &state )
+	: program( program ), state( state ) {}
 
 void Material::bind()
 {

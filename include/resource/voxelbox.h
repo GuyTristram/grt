@@ -92,7 +92,7 @@ void fill( VoxelBox< T > &b, T const &val,
 template< typename F >
 void traverse( float3 position, float3 const &dir, F &func )
 {
-	int3 ip( (int)floor(position.x), (int)floor(position.y), (int)floor(position.z) );
+	int3 ip( ( int )floor( position.x ), ( int )floor( position.y ), ( int )floor( position.z ) );
 	int3 idir;
 
 	float3 dt; // Time until ray hits next plane in each diretion

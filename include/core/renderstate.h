@@ -11,14 +11,14 @@ public:
 
 	enum BlendMode
 	{
-		Opaque,
-		Transparent,
-		Blend,
-		Add
+	    Opaque,
+	    Transparent,
+	    Blend,
+	    Add
 	};
 
 	explicit RenderState( BlendMode blend_mode = Opaque ); //,
-	                      // bool double_sided = false );
+	// bool double_sided = false );
 
 	void blend_mode( BlendMode mode );
 

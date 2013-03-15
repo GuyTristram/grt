@@ -26,18 +26,18 @@ public:
 private:
 	int m_program;
 
-    struct AttributeLocation
-    {
-        int location;
-        int *shared_location;
-    };
+	struct AttributeLocation
+	{
+		int location;
+		int *shared_location;
+	};
 	std::vector< AttributeLocation > m_att_locations;
-    struct UniformLocation
-    {
-        int location;
-        int count;
-        UniformInfo const *info;
-    };
+	struct UniformLocation
+	{
+		int location;
+		int count;
+		UniformInfo const *info;
+	};
 	std::vector< UniformLocation > m_uniform_locations;
 };
 

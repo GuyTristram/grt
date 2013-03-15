@@ -16,11 +16,11 @@ public:
 
 	enum PrimitiveType
 	{
-		Triangles,
-		Fan,
-		Strip,
-		Points,
-		Lines
+	    Triangles,
+	    Fan,
+	    Strip,
+	    Points,
+	    Lines
 	};
 
 	void clear_colour( float4 const &c );

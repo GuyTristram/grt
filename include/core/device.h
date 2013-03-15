@@ -22,7 +22,7 @@ public:
 
 private:
 	virtual void do_bind();
-    SharedPtr< DeviceImpl > m_impl;
+	SharedPtr< DeviceImpl > m_impl;
 };
 
 #endif //BRAMBLE_DEVICE_H

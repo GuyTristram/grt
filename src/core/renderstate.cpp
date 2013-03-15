@@ -15,7 +15,7 @@ void RenderState::bind()
 {
 	if( m_blend_mode == Opaque )
 		glDisable( GL_BLEND );
-	else 
+	else
 		glEnable( GL_BLEND );
 
 	switch( m_blend_mode )
@@ -24,7 +24,7 @@ void RenderState::bind()
 		glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
 		break;
 	case Blend:
-		glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+		glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE );
 		//glBlendFunc( GL_SRC_ALPHA_SATURATE, GL_ONE_MINUS_SRC_ALPHA );
 		break;
 	case Add:
@@ -62,7 +62,7 @@ void RenderState::bind()
 		if( m_draw_back )
 			glCullFace( GL_FRONT );
 		else
-			glCullFace( GL_FRONT_AND_BACK  );
+			glCullFace( GL_FRONT_AND_BACK );
 	}
 }
 

@@ -57,7 +57,7 @@ public:
 		m_obj = temp;
 	}
 
-	void set(T *obj) {SharedPtr<T> p( obj ); swap(p);}
+	void set( T *obj ) {SharedPtr<T> p( obj ); swap( p );}
 	T *get() const {return m_obj;}
 	T *operator->() const {return m_obj;}
 	T &operator*() const {return *m_obj;}

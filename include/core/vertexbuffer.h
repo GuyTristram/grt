@@ -15,7 +15,7 @@ struct VertexType
 };
 
 #define GL_TYPE( type_in, gl_type ) template<> struct VertexType< type_in > {static const int type = gl_type; static const int count = 1;}; \
-	 template<int N> struct VertexType< type_in[N] > {static const int type = gl_type; static const int count = N;};
+     template<int N> struct VertexType< type_in[N] > {static const int type = gl_type; static const int count = N;};
 
 
 GL_TYPE( signed char, GL_BYTE )
@@ -61,7 +61,7 @@ public:
 		T *operator->() const {return reinterpret_cast< T* >( m_p );}
 
 		Iterator &operator++() {m_p += m_stride; return *this;}
-		Iterator operator++(int) { Iterator temp( *this ); m_p += m_stride; return temp;}
+		Iterator operator++( int ) { Iterator temp( *this ); m_p += m_stride; return temp;}
 
 	private:
 		unsigned char *m_p;
@@ -80,8 +80,8 @@ class VertexBuffer : public Shared
 public:
 	typedef SharedPtr< VertexBuffer > Ptr;
 	VertexBuffer() : m_static_data( 0 ), m_dynamic_data( 0 ), m_gl_buffer( 0 ), m_vertex_count( 0 ),
-	                 m_static_vertex_size( 0 ), m_dynamic_vertex_size( 0 ),
-	                 m_reserved( false ) {}
+		m_static_vertex_size( 0 ), m_dynamic_vertex_size( 0 ),
+		m_reserved( false ) {}
 	~VertexBuffer();
 
 	void add_attribute( char const *name, int type, int count, int size, bool dynamic = false, bool normalize = true );

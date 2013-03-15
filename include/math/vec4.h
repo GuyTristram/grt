@@ -8,8 +8,8 @@ struct vec4
 {
 	typedef T scalar;
 	vec4() {} // No default values for x & y
-	vec4( T x, T y, T z, T w ) : x(x), y(y), z(z), w(w) {}
-	vec4( vec3<T> const &v3, T w ) : x(v3.x), y(v3.y), z(v3.z), w(w) {}
+	vec4( T x, T y, T z, T w ) : x( x ), y( y ), z( z ), w( w ) {}
+	vec4( vec3<T> const &v3, T w ) : x( v3.x ), y( v3.y ), z( v3.z ), w( w ) {}
 
 	vec3<T> xyz() const {return vec3<T>( x, y, z );}
 
@@ -30,16 +30,16 @@ typedef vec4<unsigned short> ushort4;
 typedef vec4<signed char> char4;
 typedef vec4<unsigned char> uchar4;
 
-template< typename T >					vec4<T> operator+( vec4<T> const &a, vec4<T> const &b );
-template< typename T >					vec4<T> operator-( vec4<T> const &a, vec4<T> const &b );
-template< typename T >					vec4<T> operator*( vec4<T> const &a, vec4<T> const & b );
-template< typename T, typename S >		vec4<T> operator*( S a, vec4<T> const &b );
-template< typename T, typename S >		vec4<T> operator*( vec4<T> const &a, S b );
-template< typename T, typename S >		vec4<T> operator/( vec4<T> const &a, S b );
+template< typename T >                  vec4<T> operator+( vec4<T> const &a, vec4<T> const &b );
+template< typename T >                  vec4<T> operator-( vec4<T> const &a, vec4<T> const &b );
+template< typename T >                  vec4<T> operator*( vec4<T> const &a, vec4<T> const & b );
+template< typename T, typename S >      vec4<T> operator*( S a, vec4<T> const &b );
+template< typename T, typename S >      vec4<T> operator*( vec4<T> const &a, S b );
+template< typename T, typename S >      vec4<T> operator/( vec4<T> const &a, S b );
 
-template< typename T >					T length( vec4<T> const &v );
+template< typename T >                  T length( vec4<T> const &v );
 template< typename T >                  vec4<T> unit( vec4<T> const &v );
-template< typename T >					vec4<T> dot( vec4<T> const &a, vec4<T> const &b );
+template< typename T >                  vec4<T> dot( vec4<T> const &a, vec4<T> const &b );
 
 
 // Implementation
@@ -83,15 +83,15 @@ vec4<T> operator/( vec4<T> const &a, S b )
 template< typename T >
 T length( vec4<T> const &v )
 {
-	return T(sqrt( v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w ));
+	return T( sqrt( v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w ) );
 }
 
 template< typename T >
 vec4<T> unit( vec4<T> const &v )
 {
-	T l = length(v);
+	T l = length( v );
 	if( l > 0 )
-		return v / length(v);
+		return v / length( v );
 	else
 		return v;
 }
@@ -99,6 +99,6 @@ template< typename T >
 vec4<T> dot( vec4<T> const &a, vec4<T> const &b )
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
-} 
+}
 
 #endif

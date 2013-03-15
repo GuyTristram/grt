@@ -22,10 +22,10 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 {
 	int w = device.width(), h = device.height();
 
-	SharedPtr< Texture2D > depthTexture(  new Texture2D( w, h, 1, 0, "dfc" ) );
+	SharedPtr< Texture2D > depthTexture( new Texture2D( w, h, 1, 0, "dfc" ) );
 	SharedPtr< Texture2D > normalTexture( new Texture2D( w, h, 3, 0, "c" ) );
-	SharedPtr< Texture2D > lightTexture(  new Texture2D( w, h, 4, 0, "cf" ) );
-	SharedPtr< Texture2D > hdrTexture(    new Texture2D( w, h, 3, 0, "fc" ) );
+	SharedPtr< Texture2D > lightTexture( new Texture2D( w, h, 4, 0, "cf" ) );
+	SharedPtr< Texture2D > hdrTexture( new Texture2D( w, h, 3, 0, "fc" ) );
 
 	m_gbuf_target->attach( depthTexture, TextureTarget::Depth );
 	m_gbuf_target->attach( normalTexture );
@@ -64,8 +64,8 @@ PPRenderer::~PPRenderer()
 
 void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
                          float44 const &cam_pos, float44 const &cam_pers,
-				         std::vector< float4 > const &light_positions,
-						 std::vector< float > const &light_intensities )
+                         std::vector< float4 > const &light_positions,
+                         std::vector< float > const &light_intensities )
 {
 
 	float44 cam_inv = inverse( cam_pos );
@@ -74,8 +74,8 @@ void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
 	m_gbuf_program->set( material.uniforms );
 	m_gbuf_program->set( "u_t_model_view_projection",  mod_view_pers );
 	m_gbuf_program->set( "u_t_normal", float33() );
-	
-	m_gbuf_target->clear(true, true);
+
+	m_gbuf_target->clear( true, true );
 
 	mesh.draw( *m_gbuf_program, *RenderState::stock_opaque(), *m_gbuf_target );
 
@@ -91,7 +91,7 @@ void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
 	m_light_program->set( "u_t_inv_model_view_projection", inverse( mod_view_pers ) );
 	m_light_program->set( "u_light_positions[0]", light_positions );
 	m_light_program->set( "u_light_intensities[0]", light_intensities );
-	m_light_program->set( "u_light_count", (int)light_positions.size() );
+	m_light_program->set( "u_light_count", ( int )light_positions.size() );
 	m_light_program->set( "u_eye_position", cam_pos.t );
 	m_quad.draw( *m_light_program, rs_light, *m_light_target );
 
@@ -124,7 +124,7 @@ void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
 
 void PPRenderer::render( Device &device,
                          float44 const &world_from_camera,
-						 float44 const &projected_from_camera,
+                         float44 const &projected_from_camera,
                          SceneNode &root )
 {
 	m_lights.clear();
@@ -137,13 +137,13 @@ void PPRenderer::render( Device &device,
 
 	m_gbuf_program->set( "u_t_model_view_projection",  projected_from_world );
 	m_gbuf_program->set( "u_t_normal", float33() );
-	
-	m_gbuf_target->clear(true, true);
+
+	m_gbuf_target->clear( true, true );
 
 	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
 	{
-		m_gbuf_program->set( (*m)->material->uniforms );
-		(*m)->mesh.draw( *m_gbuf_program, *RenderState::stock_opaque(), *m_gbuf_target );
+		m_gbuf_program->set( ( *m )->material->uniforms );
+		( *m )->mesh.draw( *m_gbuf_program, *RenderState::stock_opaque(), *m_gbuf_target );
 	}
 
 
@@ -166,7 +166,7 @@ void PPRenderer::render( Device &device,
 		update_light( *m_lights[i] );
 		m_light_sh_program->set( "u_light_position", m_lights[i]->position );
 		m_light_sh_program->set( "u_light_colour", m_lights[i]->colour );
-		m_light_sh_program->set( "u_light_radius2rec", 1.f / (m_lights[i]->radius * m_lights[i]->radius) );
+		m_light_sh_program->set( "u_light_radius2rec", 1.f / ( m_lights[i]->radius * m_lights[i]->radius ) );
 		m_light_sh_program->set( "u_shadow", m_lights[i]->shadow_map );
 		m_light_sh_program->set( "u_near", m_lights[i]->radius / 100.f );
 		m_light_sh_program->set( "u_far", m_lights[i]->radius );
@@ -192,8 +192,8 @@ void PPRenderer::render( Device &device,
 
 	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
 	{
-		m_shade_program->set( (*m)->material->uniforms );
-		(*m)->mesh.draw( *m_shade_program, rs_material, *m_hdr_target );
+		m_shade_program->set( ( *m )->material->uniforms );
+		( *m )->mesh.draw( *m_shade_program, rs_material, *m_hdr_target );
 	}
 
 
@@ -220,13 +220,15 @@ void PPRenderer::update_light( SceneLight &light )
 			light.shadow_map.set( new TextureCube( size, size, 1, 0, 0, 0, 0, 0, 0, "dfc" ) );
 		}
 		float44 proj = perspective( 1.57079632f, 1.f, light.radius / 100.f, light.radius );
-		float4 dir[6] = { float4(1,0,0,0), float4(-1,0,0,0), 
-		                  float4(0,1,0,0), float4(0,-1,0,0), 
-						  float4(0,0,1,0), float4(0,0,-1,0) };
+		float4 dir[6] = { float4( 1,0,0,0 ), float4( -1,0,0,0 ),
+		                  float4( 0,1,0,0 ), float4( 0,-1,0,0 ),
+		                  float4( 0,0,1,0 ), float4( 0,0,-1,0 )
+		                };
 
-		float4 up[6] =  { float4(0,-1,0,0), float4(0,-1,0,0), 
-		                  float4(0,0,1,0),  float4(0,0,-1,0), 
-		                  float4(0,-1,0,0), float4(0,-1,0,0) };
+		float4 up[6] =  { float4( 0,-1,0,0 ), float4( 0,-1,0,0 ),
+		                  float4( 0,0,1,0 ),  float4( 0,0,-1,0 ),
+		                  float4( 0,-1,0,0 ), float4( 0,-1,0,0 )
+		                };
 
 		for( int i = 0; i != 6; ++i )
 		{
@@ -237,7 +239,7 @@ void PPRenderer::update_light( SceneLight &light )
 			m_shadow_program->set( "u_projected_from_model", proj * inverse( face_from_world ) );
 			for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
 			{
-				(*m)->mesh.draw( *m_shadow_program, m_shadow_state, *m_shadow_target );
+				( *m )->mesh.draw( *m_shadow_program, m_shadow_state, *m_shadow_target );
 			}
 		}
 		light.dirty = false;
