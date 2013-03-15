@@ -1,0 +1,8 @@
+--indent=tab
+--unpad-paren
+--pad-paren-in
+--convert-tabs
+--keep-one-line-statements
+--keep-one-line-blocks
+--suffix=none
+--min-conditional-indent=0

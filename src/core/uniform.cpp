@@ -37,8 +37,8 @@ UniformBase *UniformGroup::get( char const *name, int type, bool is_array )
 {
 	for( auto uni = m_uniforms.begin(); uni != m_uniforms.end(); ++uni )
 		if( ( *uni )->info->name == name &&
-		        ( *uni )->info->type == type &&
-		        ( *uni )->is_array   == is_array ) return uni->get();
+		    ( *uni )->info->type == type &&
+		    ( *uni )->is_array   == is_array ) return uni->get();
 
 	return 0;
 }

@@ -151,7 +151,7 @@ void ShaderProgram::bind() const
 		m_uniform_locations[i].info->location = m_uniform_locations[i].location;
 		m_uniform_locations[i].info->count = m_uniform_locations[i].count;
 		if( m_uniform_locations[i].info->type == GL_SAMPLER_2D ||
-		        m_uniform_locations[i].info->type == GL_SAMPLER_CUBE )
+		    m_uniform_locations[i].info->type == GL_SAMPLER_CUBE )
 		{
 			m_uniform_locations[i].info->texture_unit = texture_unit;
 			texture_unit += m_uniform_locations[i].count;

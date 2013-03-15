@@ -73,8 +73,8 @@ CharRange read_token( CharRange &range )
 	eat_white( range );
 	const char *begin = range.begin;
 	while( !range.empty() &&
-	        !isspace( range.front() ) &&
-	        strchr( "<>\\=/", range.front() ) == 0 )
+	       !isspace( range.front() ) &&
+	       strchr( "<>\\=/", range.front() ) == 0 )
 		++range;
 	return CharRange( begin, range.begin );
 }

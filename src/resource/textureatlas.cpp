@@ -46,8 +46,8 @@ TextureAtlas::TextureAtlas( std::vector< std::string > const &sources,
 	int atlas_height = 16;
 
 	while( atlas_width  <= max_atlas_size &&
-	        atlas_height <= max_atlas_size &&
-	        !fit_all( sizes, atlas_width, atlas_height ) )
+	       atlas_height <= max_atlas_size &&
+	       !fit_all( sizes, atlas_width, atlas_height ) )
 	{
 		if( atlas_width <= atlas_height )
 			atlas_width *= 2;
@@ -58,7 +58,7 @@ TextureAtlas::TextureAtlas( std::vector< std::string > const &sources,
 	//Texture2D::Ptr t = ResourcePool::stock().texture2d( "../src/stone3.jpg" );
 
 	if( atlas_width  <= max_atlas_size &&
-	        atlas_height <= max_atlas_size )
+	    atlas_height <= max_atlas_size )
 	{
 		//m_texture.set( new Texture2D( atlas_width, atlas_height, n_channels ) );
 		m_texture = Texture2D::Ptr( new Texture2D( atlas_width, atlas_height, n_channels ) );
