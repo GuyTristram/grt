@@ -7,6 +7,7 @@
 
 #include "resource/material.h"
 #include "resource/font.h"
+#include "resource/image.h"
 
 #include "external/stb_image.h"
 #define STB_TRUETYPE_IMPLEMENTATION
@@ -231,6 +232,23 @@ SharedPtr< Texture2D > ResourcePool::texture2d( char const *filename )
 
 	m_textures[ filename ] = new_tex;
 	return new_tex;
+}
+
+SharedPtr< Image > ResourcePool::image( char const *filename )
+{
+	auto im = m_images.find( filename );
+	if( im != m_images.end() )
+		return im->second;
+
+	StbLoader loader( filename );
+
+	if( !loader.data )
+		return Image::Ptr();
+
+	Image::Ptr new_image( new Image( loader.x, loader.y, loader.n, ( void * )loader.data ) );
+
+	m_images[ filename ] = new_image;
+	return new_image;
 }
 
 SharedPtr< TextureCube > ResourcePool::texture_cube( char const *filename, char const *ext )

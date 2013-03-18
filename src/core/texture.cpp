@@ -38,13 +38,14 @@ void calc_format(
 	max_filter = GL_LINEAR;
 
 	bool is_float = false;
+	bool is_short = false;
 	bool is_depth = false;
 	while( options && *options )
 	{
 		if( *options == 'f' ) { is_float = true; }
 		else if( *options == 'c' ) { wrap_s = GL_CLAMP_TO_EDGE; wrap_t = GL_CLAMP_TO_EDGE; }
 		else if( *options == 'd' ) { is_depth = true; }
-		else if( *options == 's' ) { type = GL_UNSIGNED_SHORT; int_format = GL_R16UI; format = GL_RED_INTEGER; }
+		else if( *options == 's' ) { is_short = true; }
 		else if( *options == 'i' ) { type = GL_UNSIGNED_INT; int_format = GL_R32UI; format = GL_RED_INTEGER; }
 		++options;
 	}
@@ -65,6 +66,25 @@ void calc_format(
 			case 2: int_format = GL_RG32F; break;
 			case 3: int_format = GL_RGB32F; break;
 			case 4: int_format = GL_RGBA32F; break;
+			}
+		}
+	}
+	else if( is_short )
+	{
+		type = GL_FLOAT;
+		if( is_depth )
+		{
+			int_format = GL_DEPTH_COMPONENT16;
+			format = GL_DEPTH_COMPONENT;
+		}
+		else
+		{
+			switch( channels )
+			{
+			case 1: int_format = GL_R16; break;
+			case 2: int_format = GL_RG16; break;
+			case 3: int_format = GL_RGB16; break;
+			case 4: int_format = GL_RGBA16; break;
 			}
 		}
 	}
@@ -150,7 +170,11 @@ TextureCube::TextureCube( int width, int height, int channels,
 	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 	//glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, min_filter );
-	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, max_filter );
+	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
+	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
+	//glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_DEPTH_STENCIL_TEXTURE_MODE  , GL_LUMINANCE );
 
 }
 

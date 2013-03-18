@@ -9,14 +9,14 @@ template< typename T >
 struct mat33
 {
 	typedef T scalar;
-	typedef vec3< T > row;
+	typedef vec3< T > column;
 	mat33() : i( 1, 0, 0 ), j( 0,1,0 ), k( 0,0,1 ) {}
-	mat33( row const &i, row const &j, row const &k ) : i( i ), j( j ), k( k ) {}
+	mat33( column const &i, column const &j, column const &k ) : i( i ), j( j ), k( k ) {}
 
-	row &operator[]( int index ) {return *( &i + index );}
-	row const &operator[]( int index ) const {return *( &i + index );}
+	column &operator[]( int index ) {return *( &i + index );}
+	column const &operator[]( int index ) const {return *( &i + index );}
 
-	row i, j, k;
+	column i, j, k;
 };
 
 typedef mat33< float > float33;

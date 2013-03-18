@@ -16,6 +16,11 @@ public:
 	T &at( int3 const &v );
 	T const &at( int3 const &v ) const;
 
+	T &fast_at( int x, int y, int z );
+	T const &fast_at( int x, int y, int z ) const;
+	T &fast_at( int3 const &v );
+	T const &fast_at( int3 const &v ) const;
+
 private:
 	int3 m_size;
 	std::vector< T > m_data;
@@ -76,6 +81,30 @@ template< typename T >
 T const &VoxelBox< T >::at( int3 const &v ) const
 {
 	return at( v.x, v.y, v.z );
+}
+
+template< typename T >
+T &VoxelBox< T >::fast_at( int x, int y, int z )
+{
+	return m_data[ x + m_size.x * ( y + m_size.y * z ) ];
+}
+
+template< typename T >
+T &VoxelBox< T >::fast_at( int3 const &v )
+{
+	return fast_at( v.x, v.y, v.z );
+}
+
+template< typename T >
+T const &VoxelBox< T >::fast_at( int x, int y, int z ) const
+{
+	return m_data[ x + m_size.x * ( y + m_size.y * z ) ];
+}
+
+template< typename T >
+T const &VoxelBox< T >::fast_at( int3 const &v ) const
+{
+	return fast_at( v.x, v.y, v.z );
 }
 
 template< typename T >

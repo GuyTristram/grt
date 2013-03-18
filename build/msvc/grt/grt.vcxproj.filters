@@ -162,6 +162,12 @@
     <ClInclude Include="..\..\..\include\resource\scenenode.h">
       <Filter>Header Files\resource</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\resource\image.h">
+      <Filter>Header Files\resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\math\frustum.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\common\charrange.cpp">
@@ -229,6 +235,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\resource\scenenode.cpp">
       <Filter>Source Files\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\resource\image.cpp">
+      <Filter>Source Files\resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\math\frustum.cpp">
+      <Filter>Source Files\math</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

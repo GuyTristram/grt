@@ -16,6 +16,7 @@ struct vec4
 	vec4<T> &operator+=( vec4<T> const &b ) {x += b.x; y += b.y; z += b.z; w += b.w; return *this;}
 	vec4<T> &operator-=( vec4<T> const &b ) {x -= b.x; y -= b.y; z -= b.z; w -= b.w; return *this;}
 	vec4<T> &operator*=( vec4<T> const &b ) {x *= b.x; y *= b.y; z *= b.z; w *= b.w; return *this;}
+	vec4<T> &operator*=( T b ) {x *= b; y *= b; z *= b; w *= b; return *this;}
 	vec4<T> operator-() {return vec4<T>( -x, -y, -z, -w );}
 
 	T &operator[]( int i ) {return *( &x + i );}

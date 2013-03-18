@@ -9,14 +9,16 @@ template< typename T >
 struct mat44
 {
 	typedef T scalar;
-	typedef vec4< T > row;
+	typedef vec4< T > column;
 	mat44() : i( 1,0,0,0 ), j( 0,1,0,0 ), k( 0,0,1,0 ), t( 0,0,0,1 ) {}
-	mat44( row const &i, row const &j, row const &k, row const &t ) : i( i ), j( j ), k( k ), t( t ) {}
+	mat44( column const &i, column const &j, column const &k, column const &t ) : i( i ), j( j ), k( k ), t( t ) {}
 
-	row &operator[]( int index ) {return *( &i + index );}
-	row const &operator[]( int index ) const {return *( &i + index );}
+	column &operator[]( int index ) {return *( &i + index );}
+	column const &operator[]( int index ) const {return *( &i + index );}
 
-	row i, j, k, t;
+	vec4< T > row( int index ) const {return vec4< T >( i[index], j[index], k[index], t[index] );}
+
+	column i, j, k, t;
 };
 
 typedef mat44< float > float44;

@@ -84,6 +84,7 @@
     <ClInclude Include="..\..\..\include\input\keyboard.h" />
     <ClInclude Include="..\..\..\include\input\keys.h" />
     <ClInclude Include="..\..\..\include\input\time.h" />
+    <ClInclude Include="..\..\..\include\math\frustum.h" />
     <ClInclude Include="..\..\..\include\math\mat22.h" />
     <ClInclude Include="..\..\..\include\math\mat33.h" />
     <ClInclude Include="..\..\..\include\math\mat44.h" />
@@ -96,6 +97,7 @@
     <ClInclude Include="..\..\..\include\opengl\gl3w.h" />
     <ClInclude Include="..\..\..\include\opengl\opengl.h" />
     <ClInclude Include="..\..\..\include\resource\font.h" />
+    <ClInclude Include="..\..\..\include\resource\image.h" />
     <ClInclude Include="..\..\..\include\resource\light.h" />
     <ClInclude Include="..\..\..\include\resource\material.h" />
     <ClInclude Include="..\..\..\include\resource\mesh.h" />
@@ -115,8 +117,10 @@
     <ClCompile Include="..\..\..\src\core\uniform.cpp" />
     <ClCompile Include="..\..\..\src\core\vertexbuffer.cpp" />
     <ClCompile Include="..\..\..\src\external\stb_image.cpp" />
+    <ClCompile Include="..\..\..\src\math\frustum.cpp" />
     <ClCompile Include="..\..\..\src\math\perlin.cpp" />
     <ClCompile Include="..\..\..\src\resource\font.cpp" />
+    <ClCompile Include="..\..\..\src\resource\image.cpp" />
     <ClCompile Include="..\..\..\src\resource\material.cpp" />
     <ClCompile Include="..\..\..\src\resource\mesh.cpp" />
     <ClCompile Include="..\..\..\src\resource\pprenderer.cpp" />

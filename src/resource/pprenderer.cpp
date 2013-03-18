@@ -6,6 +6,8 @@
 #include "core/texturetarget.h"
 #include "core/texture.h"
 
+#include "math/frustum.h"
+
 #include "resource/material.h"
 #include "resource/mesh.h"
 #include "resource/resourcepool.h"
@@ -24,8 +26,8 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 
 	SharedPtr< Texture2D > depthTexture( new Texture2D( w, h, 1, 0, "dfc" ) );
 	SharedPtr< Texture2D > normalTexture( new Texture2D( w, h, 3, 0, "c" ) );
-	SharedPtr< Texture2D > lightTexture( new Texture2D( w, h, 4, 0, "cf" ) );
-	SharedPtr< Texture2D > hdrTexture( new Texture2D( w, h, 3, 0, "fc" ) );
+	SharedPtr< Texture2D > lightTexture( new Texture2D( w, h, 4, 0, "cs" ) );
+	SharedPtr< Texture2D > hdrTexture( new Texture2D( w, h, 3, 0, "cs" ) );
 
 	m_gbuf_target->attach( depthTexture, TextureTarget::Depth );
 	m_gbuf_target->attach( normalTexture );
@@ -150,10 +152,8 @@ void PPRenderer::render( Device &device,
 	// Render lights into light target
 
 	RenderState rs_light;
-	rs_light.depth_test( false );
+	rs_light.depth_test( true );
 	rs_light.depth_write( false );
-	rs_light.draw_back( true );
-	rs_light.draw_front( false );
 	rs_light.blend_mode( RenderState::Add );
 
 	m_light_target->clear( true, false );
@@ -161,11 +161,28 @@ void PPRenderer::render( Device &device,
 	m_light_sh_program->set( "u_eye_position", world_from_camera.t );
 	m_light_sh_program->set( "u_world_from_projected", inverse( projected_from_world ) );
 
+	Frustum frustum( projected_from_world );
+
 	for( int i = 0; i != m_lights.size(); ++i )
 	{
+		if( !frustum.intersect_sphere( m_lights[i]->position.xyz(), m_lights[i]->radius ) )
+			continue;
+		if( length( ( m_lights[i]->position - world_from_camera.t ).xyz() ) > m_lights[i]->radius + 5.f )
+		{
+			rs_light.depth_compare( RenderState::LEqual );
+			rs_light.draw_back( false );
+			rs_light.draw_front( true );
+		}
+		else
+		{
+			rs_light.depth_compare( RenderState::Greater );
+			rs_light.draw_back( true );
+			rs_light.draw_front( false );
+		}
 		update_light( *m_lights[i] );
 		m_light_sh_program->set( "u_light_position", m_lights[i]->position );
 		m_light_sh_program->set( "u_light_colour", m_lights[i]->colour );
+		m_light_sh_program->set( "u_light_radius2", m_lights[i]->radius * m_lights[i]->radius );
 		m_light_sh_program->set( "u_light_radius2rec", 1.f / ( m_lights[i]->radius * m_lights[i]->radius ) );
 		m_light_sh_program->set( "u_shadow", m_lights[i]->shadow_map );
 		m_light_sh_program->set( "u_near", m_lights[i]->radius / 100.f );
@@ -216,8 +233,8 @@ void PPRenderer::update_light( SceneLight &light )
 	{
 		if( !light.shadow_map )
 		{
-			int size = 512;
-			light.shadow_map.set( new TextureCube( size, size, 1, 0, 0, 0, 0, 0, 0, "dfc" ) );
+			int size = 256;
+			light.shadow_map.set( new TextureCube( size, size, 1, 0, 0, 0, 0, 0, 0, "dsc" ) );
 		}
 		float44 proj = perspective( 1.57079632f, 1.f, light.radius / 100.f, light.radius );
 		float4 dir[6] = { float4( 1,0,0,0 ), float4( -1,0,0,0 ),

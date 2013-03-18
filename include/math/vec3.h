@@ -34,11 +34,14 @@ template< typename T, typename S >      vec3<T> operator*( S a, vec3<T> const &b
 template< typename T, typename S >      vec3<T> operator*( vec3<T> const &a, S b );
 template< typename T, typename S >      vec3<T> operator/( vec3<T> const &a, S b );
 
+template< typename T >                  bool operator==( vec3<T> const &a, vec3<T> const & b );
+template< typename T >                  bool operator!=( vec3<T> const &a, vec3<T> const & b );
+
 template< typename T >                  T length( vec3<T> const &v );
 template< typename T >                  T manhattan( vec3<T> const &v );
 template< typename T >                  vec3<T> unit( vec3<T> const &v );
 template< typename T >                  vec3<T> cross( vec3<T> const &a, vec3<T> const &b );
-template< typename T >                  vec3<T> dot( vec3<T> const &a, vec3<T> const &b );
+template< typename T >                  T dot( vec3<T> const &a, vec3<T> const &b );
 
 
 // Implementation
@@ -80,6 +83,19 @@ vec3<T> operator/( vec3<T> const &a, S b )
 }
 
 template< typename T >
+bool operator==( vec3<T> const &a, vec3<T> const & b )
+{
+	return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+
+template< typename T >
+bool operator!=( vec3<T> const &a, vec3<T> const & b )
+{
+	return !( a == b );
+}
+
+
+template< typename T >
 T length( vec3<T> const &v )
 {
 	return T( sqrt( v.x * v.x + v.y * v.y + v.z * v.z ) );
@@ -107,7 +123,7 @@ vec3<T> cross( vec3<T> const &a, vec3<T> const &b )
 }
 
 template< typename T >
-vec3<T> dot( vec3<T> const &a, vec3<T> const &b )
+T dot( vec3<T> const &a, vec3<T> const &b )
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }

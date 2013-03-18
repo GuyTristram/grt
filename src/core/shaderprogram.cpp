@@ -93,6 +93,8 @@ ShaderProgram::ShaderProgram( char const *vertex_source, char const *fragment_so
 				GLenum type;
 				glGetActiveUniform( m_program, i, 256, 0, &size, &type, name );
 
+				if( type == GL_SAMPLER_CUBE_SHADOW ) type = GL_SAMPLER_CUBE;
+
 				m_uniform_locations.push_back( UniformLocation() );
 				m_uniform_locations.back().location =
 				    glGetUniformLocation( m_program, name );

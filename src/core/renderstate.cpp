@@ -3,6 +3,7 @@
 
 RenderState::RenderState( BlendMode blend_mode )
 	: m_blend_mode( blend_mode ),
+	  m_depth_compare( LEqual ),
 	  m_draw_front( true ),
 	  m_draw_back( false ),
 	  m_depth_write( true ),
@@ -42,7 +43,19 @@ void RenderState::bind()
 	if( m_depth_test )
 	{
 		glEnable( GL_DEPTH_TEST );
-		glDepthFunc( GL_LEQUAL );
+		GLenum f;
+		switch( m_depth_compare )
+		{
+		case Never:    f = GL_NEVER; break;
+		case Less:     f = GL_LESS; break;
+		case Equal:    f = GL_EQUAL; break;
+		case LEqual:   f = GL_LEQUAL; break;
+		case Greater:  f = GL_GREATER; break;
+		case NotEqual: f = GL_NOTEQUAL; break;
+		case GEqual:   f = GL_GEQUAL; break;
+		case Always:   f = GL_ALWAYS; break;
+		}
+		glDepthFunc( f );
 	}
 	else
 		glDisable( GL_DEPTH_TEST );
@@ -79,6 +92,11 @@ void RenderState::depth_write( bool f )
 void RenderState::depth_test( bool f )
 {
 	m_depth_test = f;
+}
+
+void RenderState::depth_compare( Compare comp )
+{
+	m_depth_compare = comp;
 }
 
 void RenderState::colour_write( bool f )

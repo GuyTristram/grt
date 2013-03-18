@@ -17,6 +17,18 @@ public:
 	    Add
 	};
 
+	enum Compare
+	{
+		Never,
+		Less,
+		Equal,
+		LEqual,
+		Greater,
+		NotEqual,
+		GEqual,
+		Always
+	};
+
 	explicit RenderState( BlendMode blend_mode = Opaque ); //,
 	// bool double_sided = false );
 
@@ -24,6 +36,7 @@ public:
 
 	void depth_write( bool f );
 	void depth_test( bool f );
+	void depth_compare( Compare comp );
 
 	void colour_write( bool f );
 
@@ -38,6 +51,7 @@ private:
 	void unbind();
 
 	BlendMode m_blend_mode;
+	Compare m_depth_compare;
 	bool m_depth_write;
 	bool m_depth_test;
 	bool m_draw_front;

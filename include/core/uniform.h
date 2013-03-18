@@ -11,24 +11,7 @@
 #include <string>
 #include <vector>
 
-struct UniformInfo
-{
-	std::string name;
-	int type;
-
-	// These are set by ShaderProgram::bind() to reflect location etc. of the
-	// uniform for that program.
-	mutable int location;
-	mutable int count;
-	mutable int texture_unit;
-
-	static UniformInfo const *get( char const *name, int type );
-
-	// Provided so that UniformInfo objects can be stored in a map
-	bool operator<( UniformInfo const &id2 ) const;
-};
-
-
+struct UniformInfo;
 
 class UniformBase : public Shared
 {
@@ -72,6 +55,24 @@ private:
 	typedef SharedPtr< UniformBase > UniformPtr;
 	UniformBase *get( char const *name, int type, bool is_array );
 	std::vector< UniformPtr > m_uniforms;
+};
+
+
+struct UniformInfo
+{
+	std::string name;
+	int type;
+
+	// These are set by ShaderProgram::bind() to reflect location etc. of the
+	// uniform for that program.
+	mutable int location;
+	mutable int count;
+	mutable int texture_unit;
+
+	static UniformInfo const *get( char const *name, int type );
+
+	// Provided so that UniformInfo objects can be stored in a map
+	bool operator<( UniformInfo const &id2 ) const;
 };
 
 

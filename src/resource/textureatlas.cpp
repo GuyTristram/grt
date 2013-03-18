@@ -25,7 +25,7 @@ TextureAtlas::TextureAtlas( std::vector< std::string > const &sources,
 	int n_channels = 0;
 	for( int i = 0; i != n_sources; ++i )
 	{
-		Texture2D::Ptr t = ResourcePool::stock().texture2d( sources[i].c_str() );
+		Texture2D::Ptr t = pool.texture2d( sources[i].c_str() );
 		if( !t.get() )
 		{
 			printf( "Error: failed to load texture %s \n", sources[i].c_str() );

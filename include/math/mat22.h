@@ -9,14 +9,14 @@ template< typename T >
 struct mat22
 {
 	typedef T scalar;
-	typedef vec2< T > row;
+	typedef vec2< T > column;
 	mat22() : i( 1, 0 ), j( 0,1 ) {}
-	mat22( row const &i, row const &j ) : i( i ), j( j ) {}
+	mat22( column const &i, column const &j ) : i( i ), j( j ) {}
 
-	row &operator[]( int index ) {return *( &i + index );}
-	row const &operator[]( int index ) const {return *( &i + index );}
+	column &operator[]( int index ) {return *( &i + index );}
+	column const &operator[]( int index ) const {return *( &i + index );}
 
-	row i, j;
+	column i, j;
 };
 
 typedef mat22< float > float22;
