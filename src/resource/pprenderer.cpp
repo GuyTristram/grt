@@ -137,6 +137,8 @@ void PPRenderer::render( Device &device,
 	float44 camera_from_world = inverse( world_from_camera );
 	float44 projected_from_world = projected_from_camera * camera_from_world;
 
+	Frustum frustum( projected_from_world );
+
 	m_gbuf_program->set( "u_t_model_view_projection",  projected_from_world );
 	m_gbuf_program->set( "u_t_normal", float33() );
 
@@ -144,8 +146,11 @@ void PPRenderer::render( Device &device,
 
 	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
 	{
-		m_gbuf_program->set( ( *m )->material->uniforms );
-		( *m )->mesh.draw( *m_gbuf_program, *RenderState::stock_opaque(), *m_gbuf_target );
+		if( frustum.intersect_aabb( ( *m )->aabb ) )
+		{
+			m_gbuf_program->set( ( *m )->material->uniforms );
+			( *m )->mesh.draw( *m_gbuf_program, *RenderState::stock_opaque(), *m_gbuf_target );
+		}
 	}
 
 
@@ -161,7 +166,6 @@ void PPRenderer::render( Device &device,
 	m_light_sh_program->set( "u_eye_position", world_from_camera.t );
 	m_light_sh_program->set( "u_world_from_projected", inverse( projected_from_world ) );
 
-	Frustum frustum( projected_from_world );
 
 	for( int i = 0; i != m_lights.size(); ++i )
 	{
@@ -249,14 +253,18 @@ void PPRenderer::update_light( SceneLight &light )
 
 		for( int i = 0; i != 6; ++i )
 		{
+			float44 face_from_world = inverse( look_at( light.position, light.position + dir[i], up[i] ) );
+			float44 proj_from_world = proj * face_from_world;
+			Frustum frustum( proj_from_world );
+			m_shadow_program->set( "u_projected_from_model", proj_from_world );
+
 			m_shadow_target->attach( light.shadow_map, i, TextureTarget::Depth );
 			m_shadow_target->is_complete();
 			m_shadow_target->clear( false, true );
-			float44 face_from_world = look_at( light.position, light.position + dir[i], up[i] );
-			m_shadow_program->set( "u_projected_from_model", proj * inverse( face_from_world ) );
 			for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
 			{
-				( *m )->mesh.draw( *m_shadow_program, m_shadow_state, *m_shadow_target );
+				if( frustum.intersect_aabb( (*m)->aabb ) )
+					( *m )->mesh.draw( *m_shadow_program, m_shadow_state, *m_shadow_target );
 			}
 		}
 		light.dirty = false;

@@ -5,6 +5,7 @@
 #include "resource/mesh.h"
 #include "resource/material.h"
 #include "math/mat44.h"
+#include "math/frustum.h"
 
 #include <vector>
 
@@ -74,6 +75,7 @@ public:
 
 	Mesh          mesh;
 	Material::Ptr material;
+	AABB          aabb;      // \todo This will need to be updated as soon as we're using a heirarchy
 
 	virtual void accept( SceneNodeVisitor &visitor );
 };

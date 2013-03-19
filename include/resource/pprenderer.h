@@ -51,6 +51,8 @@ private:
 	SharedPtr< TextureTarget > m_light_target;
 	SharedPtr< TextureTarget > m_shadow_target;
 	SharedPtr< TextureTarget > m_hdr_target;
+	SharedPtr< TextureTarget > m_near_light_target;
+	SharedPtr< TextureTarget > m_far_light_target;
 
 	UniformGroup m_shadow_uniforms;
 	UniformGroup m_light_uniforms;

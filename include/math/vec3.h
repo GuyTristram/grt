@@ -42,6 +42,7 @@ template< typename T >                  T manhattan( vec3<T> const &v );
 template< typename T >                  vec3<T> unit( vec3<T> const &v );
 template< typename T >                  vec3<T> cross( vec3<T> const &a, vec3<T> const &b );
 template< typename T >                  T dot( vec3<T> const &a, vec3<T> const &b );
+template< typename T >                  vec3<T> abs( vec3<T> const &a );
 
 
 // Implementation
@@ -106,6 +107,13 @@ T manhattan( vec3<T> const &v )
 {
 	return T( abs( v.x ) + abs( v.y ) + abs( v.z ) );
 }
+
+template< typename T >
+vec3<T> abs( vec3<T> const &v )
+{
+	return vec3<T>( abs( v.x ), abs( v.y ), abs( v.z ) );
+}
+
 
 template< typename T >
 vec3<T> unit( vec3<T> const &v )
