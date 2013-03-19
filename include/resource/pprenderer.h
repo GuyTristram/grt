@@ -41,6 +41,7 @@ private:
 	static const int SHADOW_SIZE = 256;
 	void update_light( SceneLight &light );
 
+	SharedPtr< ShaderProgram > m_depth_pass_program;
 	SharedPtr< ShaderProgram > m_gbuf_program;
 	SharedPtr< ShaderProgram > m_light_program;
 	SharedPtr< ShaderProgram > m_light_sh_program;
@@ -49,6 +50,7 @@ private:
 	SharedPtr< ShaderProgram > m_shadow_program;
 	SharedPtr< ShaderProgram > m_shadow_combine_program;
 
+	SharedPtr< TextureTarget > m_depth_pass_target;
 	SharedPtr< TextureTarget > m_gbuf_target;
 	SharedPtr< TextureTarget > m_light_target;
 	SharedPtr< TextureTarget > m_shadow_target;

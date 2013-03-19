@@ -15,6 +15,7 @@
 
 
 PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
+	m_depth_pass_target( new TextureTarget() ),
 	m_gbuf_target( new TextureTarget() ),
 	m_light_target( new TextureTarget() ),
 	m_hdr_target( new TextureTarget() ),
@@ -32,6 +33,9 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	SharedPtr< Texture2D > hdrTexture( new Texture2D( w, h, 3, 0, "cs" ) );
 	m_near_light_texture.set( new Texture2D( SHADOW_SIZE, SHADOW_SIZE, 1,  0, "dfc" ) );
 	m_far_light_texture.set( new Texture2D( SHADOW_SIZE, SHADOW_SIZE, 1,  0, "dfc" ) );
+
+	m_depth_pass_target->attach( depthTexture, TextureTarget::Depth );
+	m_depth_pass_target->is_complete();
 
 	m_gbuf_target->attach( depthTexture, TextureTarget::Depth );
 	m_gbuf_target->attach( normalTexture );
@@ -58,12 +62,13 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 
 	m_hdr_uniforms.set( "u_texture", hdrTexture );
 
-	m_gbuf_program     = pool.shader_program( "draw_normals.sp" );
-	m_light_program    = pool.shader_program( "draw_lights.sp" );
-	m_light_sh_program = pool.shader_program( "draw_lights_sh.sp" );
-	m_shade_program    = pool.shader_program( "use_light_map.sp" );
-	m_hdr_program      = pool.shader_program( "hdr.sp" );
-	m_shadow_program   = pool.shader_program( "draw_shadow_map.sp" );
+	m_depth_pass_program       = pool.shader_program( "depth_pass.sp" );
+	m_gbuf_program             = pool.shader_program( "draw_normals.sp" );
+	m_light_program            = pool.shader_program( "draw_lights.sp" );
+	m_light_sh_program         = pool.shader_program( "draw_lights_sh.sp" );
+	m_shade_program            = pool.shader_program( "use_light_map.sp" );
+	m_hdr_program              = pool.shader_program( "hdr.sp" );
+	m_shadow_program           = pool.shader_program( "draw_shadow_map.sp" );
 	m_shadow_combine_program   = pool.shader_program( "combine_shadow_maps.sp" );
 
 	m_shadow_state.colour_write( false );
@@ -150,17 +155,33 @@ void PPRenderer::render( Device &device,
 
 	Frustum frustum( projected_from_world );
 
+	m_depth_pass_program->set( "u_t_model_view_projection",  projected_from_world );
+	m_depth_pass_target->clear( false, true );
+
+	RenderState depth_pass_state;
+	depth_pass_state.colour_write( false );
+
+	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
+	{
+		if( frustum.intersect_aabb( ( *m )->aabb ) )
+		{
+			( *m )->mesh.draw( *m_depth_pass_program, depth_pass_state, *m_depth_pass_target );
+		}
+	}
+
 	m_gbuf_program->set( "u_t_model_view_projection",  projected_from_world );
 	m_gbuf_program->set( "u_t_normal", float33() );
 
-	m_gbuf_target->clear( true, true );
+	m_gbuf_target->clear( true, false );
+	RenderState gbuf_state;
+	gbuf_state.depth_write( false );
 
 	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
 	{
 		if( frustum.intersect_aabb( ( *m )->aabb ) )
 		{
 			m_gbuf_program->set( ( *m )->material->uniforms );
-			( *m )->mesh.draw( *m_gbuf_program, *RenderState::stock_opaque(), *m_gbuf_target );
+			( *m )->mesh.draw( *m_gbuf_program, gbuf_state, *m_gbuf_target );
 		}
 	}
 
@@ -195,6 +216,7 @@ void PPRenderer::render( Device &device,
 			rs_light.draw_front( false );
 		}
 		update_light( *m_lights[i] );
+		m_light_sh_program->set( m_light_uniforms );
 		m_light_sh_program->set( "u_light_position", m_lights[i]->position );
 		m_light_sh_program->set( "u_light_colour", m_lights[i]->colour );
 		m_light_sh_program->set( "u_light_radius2", m_lights[i]->radius * m_lights[i]->radius );
@@ -295,6 +317,8 @@ void PPRenderer::update_light( SceneLight &light )
 			m_shadow_target->clear( false, true );
 			m_shadow_combine_program->set( "u_near_depth", m_near_light_texture );
 			m_shadow_combine_program->set( "u_far_depth", m_far_light_texture );
+			m_shadow_combine_program->set( "u_near", light.radius / 100.f );
+			m_shadow_combine_program->set( "u_far", light.radius );
 			m_quad.draw( *m_shadow_combine_program, m_shadow_state, *m_shadow_target );
 		}
 		light.dirty = false;
