@@ -38,6 +38,7 @@ public:
 	virtual void visit( SceneLight &light );
 
 private:
+	static const int SHADOW_SIZE = 256;
 	void update_light( SceneLight &light );
 
 	SharedPtr< ShaderProgram > m_gbuf_program;
@@ -46,13 +47,17 @@ private:
 	SharedPtr< ShaderProgram > m_shade_program;
 	SharedPtr< ShaderProgram > m_hdr_program;
 	SharedPtr< ShaderProgram > m_shadow_program;
+	SharedPtr< ShaderProgram > m_shadow_combine_program;
 
 	SharedPtr< TextureTarget > m_gbuf_target;
 	SharedPtr< TextureTarget > m_light_target;
 	SharedPtr< TextureTarget > m_shadow_target;
 	SharedPtr< TextureTarget > m_hdr_target;
-	SharedPtr< TextureTarget > m_near_light_target;
-	SharedPtr< TextureTarget > m_far_light_target;
+	SharedPtr< TextureTarget > m_near_shadow_target;
+	SharedPtr< TextureTarget > m_far_shadow_target;
+
+	SharedPtr< Texture2D > m_near_light_texture;
+	SharedPtr< Texture2D > m_far_light_texture;
 
 	UniformGroup m_shadow_uniforms;
 	UniformGroup m_light_uniforms;

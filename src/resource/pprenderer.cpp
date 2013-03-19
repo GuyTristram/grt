@@ -19,6 +19,8 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	m_light_target( new TextureTarget() ),
 	m_hdr_target( new TextureTarget() ),
 	m_shadow_target( new TextureTarget() ),
+	m_near_shadow_target( new TextureTarget() ),
+	m_far_shadow_target( new TextureTarget() ),
 	m_quad( make_quad() ),
 	m_icosohedron( make_cube() )
 {
@@ -28,6 +30,8 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	SharedPtr< Texture2D > normalTexture( new Texture2D( w, h, 3, 0, "c" ) );
 	SharedPtr< Texture2D > lightTexture( new Texture2D( w, h, 4, 0, "cs" ) );
 	SharedPtr< Texture2D > hdrTexture( new Texture2D( w, h, 3, 0, "cs" ) );
+	m_near_light_texture.set( new Texture2D( SHADOW_SIZE, SHADOW_SIZE, 1,  0, "dfc" ) );
+	m_far_light_texture.set( new Texture2D( SHADOW_SIZE, SHADOW_SIZE, 1,  0, "dfc" ) );
 
 	m_gbuf_target->attach( depthTexture, TextureTarget::Depth );
 	m_gbuf_target->attach( normalTexture );
@@ -40,6 +44,12 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	m_hdr_target->attach( depthTexture, TextureTarget::Depth );
 	m_hdr_target->attach( hdrTexture );
 	m_hdr_target->is_complete();
+
+	m_near_shadow_target->attach( m_near_light_texture, TextureTarget::Depth );
+	m_near_shadow_target->is_complete();
+
+	m_far_shadow_target->attach( m_far_light_texture, TextureTarget::Depth );
+	m_far_shadow_target->is_complete();
 
 	m_light_uniforms.set( "u_depth", depthTexture );
 	m_light_uniforms.set( "u_normal", normalTexture );
@@ -54,6 +64,7 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	m_shade_program    = pool.shader_program( "use_light_map.sp" );
 	m_hdr_program      = pool.shader_program( "hdr.sp" );
 	m_shadow_program   = pool.shader_program( "draw_shadow_map.sp" );
+	m_shadow_combine_program   = pool.shader_program( "combine_shadow_maps.sp" );
 
 	m_shadow_state.colour_write( false );
 	m_shadow_state.draw_back( false );
@@ -237,8 +248,7 @@ void PPRenderer::update_light( SceneLight &light )
 	{
 		if( !light.shadow_map )
 		{
-			int size = 256;
-			light.shadow_map.set( new TextureCube( size, size, 1, 0, 0, 0, 0, 0, 0, "dsc" ) );
+			light.shadow_map.set( new TextureCube( SHADOW_SIZE, SHADOW_SIZE, 1, 0, 0, 0, 0, 0, 0, "dsc" ) );
 		}
 		float44 proj = perspective( 1.57079632f, 1.f, light.radius / 100.f, light.radius );
 		float4 dir[6] = { float4( 1,0,0,0 ), float4( -1,0,0,0 ),
@@ -257,15 +267,35 @@ void PPRenderer::update_light( SceneLight &light )
 			float44 proj_from_world = proj * face_from_world;
 			Frustum frustum( proj_from_world );
 			m_shadow_program->set( "u_projected_from_model", proj_from_world );
+			m_shadow_state.depth_test( true );
 
-			m_shadow_target->attach( light.shadow_map, i, TextureTarget::Depth );
-			m_shadow_target->is_complete();
-			m_shadow_target->clear( false, true );
+			m_shadow_state.draw_back( false );
+			m_shadow_state.draw_front( true );
+			m_near_shadow_target->clear( false, true );
 			for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
 			{
 				if( frustum.intersect_aabb( (*m)->aabb ) )
-					( *m )->mesh.draw( *m_shadow_program, m_shadow_state, *m_shadow_target );
+					( *m )->mesh.draw( *m_shadow_program, m_shadow_state, *m_near_shadow_target );
 			}
+
+			m_shadow_state.draw_back( true );
+			m_shadow_state.draw_front( false );
+			m_far_shadow_target->clear( false, true );
+			for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
+			{
+				if( frustum.intersect_aabb( (*m)->aabb ) )
+					( *m )->mesh.draw( *m_shadow_program, m_shadow_state, *m_far_shadow_target );
+			}
+
+			m_shadow_target->attach( light.shadow_map, i, TextureTarget::Depth );
+			m_shadow_target->is_complete();
+			//m_shadow_state.depth_test( false );
+			m_shadow_state.draw_back( false );
+			m_shadow_state.draw_front( true );
+			m_shadow_target->clear( false, true );
+			m_shadow_combine_program->set( "u_near_depth", m_near_light_texture );
+			m_shadow_combine_program->set( "u_far_depth", m_far_light_texture );
+			m_quad.draw( *m_shadow_combine_program, m_shadow_state, *m_shadow_target );
 		}
 		light.dirty = false;
 		light.shadow_map->gen_mipmaps();

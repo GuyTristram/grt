@@ -115,6 +115,7 @@ Texture2D::Texture2D( int width, int height, int channels, void *data, char cons
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_t );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min_filter );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, max_filter );
+	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_NONE );
 
 	glTexImage2D( GL_TEXTURE_2D, 0, int_format, width, height, 0, format, type, data );
 
