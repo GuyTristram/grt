@@ -12,6 +12,7 @@ struct vec4
 	vec4( vec3<T> const &v3, T w ) : x( v3.x ), y( v3.y ), z( v3.z ), w( w ) {}
 
 	vec3<T> xyz() const {return vec3<T>( x, y, z );}
+	vec3<T> &xyz() {return reinterpret_cast< vec3<T> &>( *this );}
 
 	vec4<T> &operator+=( vec4<T> const &b ) {x += b.x; y += b.y; z += b.z; w += b.w; return *this;}
 	vec4<T> &operator-=( vec4<T> const &b ) {x -= b.x; y -= b.y; z -= b.z; w -= b.w; return *this;}
