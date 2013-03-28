@@ -36,6 +36,7 @@ public:
 
 	void set_parent( SceneNode *parent );
 
+	void parent_from_local( float44 const &m );
 	float44 const &world_from_model();
 
 	virtual void accept( SceneNodeVisitor &visitor );
@@ -46,6 +47,7 @@ public:
 	Iterator end();
 
 protected:
+	float44 m_parent_from_local;
 	float44 m_world_from_model;
 	void set_dirty();
 
@@ -76,6 +78,7 @@ public:
 	Mesh          mesh;
 	Material::Ptr material;
 	AABB          aabb;      // \todo This will need to be updated as soon as we're using a heirarchy
+	float distance_from_eye2;
 
 	virtual void accept( SceneNodeVisitor &visitor );
 };
@@ -104,5 +107,7 @@ public:
 
 
 void visit_scene( SceneNode &node, SceneNodeVisitor &visitor );
+
+SceneNode::Ptr load_model( char const *filename );
 
 #endif // SCENENODE_H

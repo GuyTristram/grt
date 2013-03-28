@@ -140,6 +140,11 @@ void PPRenderer::render( Device &device, Mesh &mesh, Material &material,
 	m_quad.draw( *m_hdr_program, rs_quad, device );
 }
 
+bool dist_sort( SceneMesh const *a, SceneMesh const *b )
+{
+	return a->distance_from_eye2 < b->distance_from_eye2;
+}
+
 void PPRenderer::render( Device &device,
                          float44 const &world_from_camera,
                          float44 const &projected_from_camera,
@@ -150,10 +155,19 @@ void PPRenderer::render( Device &device,
 
 	visit_scene( root, *this );
 
+	float3 eye_pos = world_from_camera.t.xyz();
+
+	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
+		( *m )->distance_from_eye2 = length_sqr( ( *m )->aabb.mid - eye_pos );
+
+	std::sort( m_meshes.begin(), m_meshes.end(), dist_sort );
+
 	float44 camera_from_world = inverse( world_from_camera );
 	float44 projected_from_world = projected_from_camera * camera_from_world;
 
 	Frustum frustum( projected_from_world );
+
+	// Depth pass
 
 	m_depth_pass_program->set( "u_t_model_view_projection",  projected_from_world );
 	m_depth_pass_target->clear( false, true );
@@ -161,29 +175,19 @@ void PPRenderer::render( Device &device,
 	RenderState depth_pass_state;
 	depth_pass_state.colour_write( false );
 
-	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
-	{
-		if( frustum.intersect_aabb( ( *m )->aabb ) )
-		{
-			( *m )->mesh.draw( *m_depth_pass_program, depth_pass_state, *m_depth_pass_target );
-		}
-	}
+	draw_meshes( *m_depth_pass_program, depth_pass_state, *m_depth_pass_target, frustum, projected_from_world );
+
+	// Geometery pass
 
 	m_gbuf_program->set( "u_t_model_view_projection",  projected_from_world );
 	m_gbuf_program->set( "u_t_normal", float33() );
 
-	m_gbuf_target->clear( true, false );
+	//m_gbuf_target->clear( true, false );
 	RenderState gbuf_state;
 	gbuf_state.depth_write( false );
 
-	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
-	{
-		if( frustum.intersect_aabb( ( *m )->aabb ) )
-		{
-			m_gbuf_program->set( ( *m )->material->uniforms );
-			( *m )->mesh.draw( *m_gbuf_program, gbuf_state, *m_gbuf_target );
-		}
-	}
+	draw_meshes( *m_gbuf_program, gbuf_state, *m_gbuf_target, frustum, projected_from_world );
+
 
 
 	// Render lights into light target
@@ -203,7 +207,7 @@ void PPRenderer::render( Device &device,
 	{
 		if( !frustum.intersect_sphere( m_lights[i]->position.xyz(), m_lights[i]->radius ) )
 			continue;
-		if( length( ( m_lights[i]->position - world_from_camera.t ).xyz() ) > m_lights[i]->radius + 5.f )
+		if( length( ( m_lights[i]->position - world_from_camera.t ).xyz() ) > m_lights[i]->radius * 1.5f )
 		{
 			rs_light.depth_compare( RenderState::LEqual );
 			rs_light.draw_back( false );
@@ -244,11 +248,7 @@ void PPRenderer::render( Device &device,
 
 	m_hdr_target->clear( true, false );
 
-	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
-	{
-		m_shade_program->set( ( *m )->material->uniforms );
-		( *m )->mesh.draw( *m_shade_program, rs_material, *m_hdr_target );
-	}
+	draw_meshes( *m_shade_program, rs_material, *m_hdr_target, frustum, projected_from_world );
 
 
 	// Render final image
@@ -262,6 +262,19 @@ void PPRenderer::render( Device &device,
 	device.clear();
 
 	m_quad.draw( *m_hdr_program, rs_quad, device );
+}
+
+void PPRenderer::draw_meshes( ShaderProgram &p, RenderState &s, RenderTarget &t, Frustum const &f, float44 const &projected_from_world )
+{
+	for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
+	{
+		if( f.intersect_aabb( ( *m )->aabb ) )
+		{
+			p.set( "u_t_model_view_projection",  projected_from_world * ( *m )->world_from_model() );
+			p.set( ( *m )->material->uniforms );
+			( *m )->mesh.draw( p, s, t );
+		}
+	}
 }
 
 void PPRenderer::update_light( SceneLight &light )
@@ -297,7 +310,10 @@ void PPRenderer::update_light( SceneLight &light )
 			for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
 			{
 				if( frustum.intersect_aabb( (*m)->aabb ) )
+				{
+					m_shadow_program->set( "u_projected_from_model", proj_from_world * ( *m )->world_from_model() );
 					( *m )->mesh.draw( *m_shadow_program, m_shadow_state, *m_near_shadow_target );
+				}
 			}
 
 			m_shadow_state.draw_back( true );
@@ -306,7 +322,10 @@ void PPRenderer::update_light( SceneLight &light )
 			for( auto m = m_meshes.begin(); m != m_meshes.end(); ++m )
 			{
 				if( frustum.intersect_aabb( (*m)->aabb ) )
+				{
+					m_shadow_program->set( "u_projected_from_model", proj_from_world * ( *m )->world_from_model() );
 					( *m )->mesh.draw( *m_shadow_program, m_shadow_state, *m_far_shadow_target );
+				}
 			}
 
 			m_shadow_target->attach( light.shadow_map, i, TextureTarget::Depth );

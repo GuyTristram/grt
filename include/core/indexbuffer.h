@@ -10,7 +10,7 @@ class IndexBuffer : public Shared
 {
 public:
 	typedef SharedPtr< IndexBuffer > Ptr;
-	explicit IndexBuffer( int count = 0, unsigned short *indices = 0 )
+	explicit IndexBuffer( int count = 0, unsigned short *indices = 0, bool dynamic = false ) : m_dynamic( dynamic ), m_gl_buffer( 0 )
 	{
 		if( count ) m_indices.resize( count );
 		if( count && indices ) std::copy( indices, indices + count, m_indices.begin() );
@@ -18,13 +18,16 @@ public:
 
 	IndexBuffer &add( unsigned short index ) {m_indices.push_back( index ); return *this;}
 
-	unsigned short *indices() {return &m_indices[0];}
+	unsigned short *indices();
 
 	int count() const {return m_indices.size();}
 	void clear() {m_indices.clear();}
 
 private:
 	std::vector< unsigned short > m_indices;
+	bool m_dynamic;
+
+	unsigned int m_gl_buffer;
 };
 
 #endif // INDEXBUFFER_H

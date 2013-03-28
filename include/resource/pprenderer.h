@@ -40,6 +40,7 @@ public:
 private:
 	static const int SHADOW_SIZE = 256;
 	void update_light( SceneLight &light );
+	void draw_meshes( ShaderProgram &p, RenderState &s, RenderTarget &t, Frustum const &f, float44 const &projected_from_world );
 
 	SharedPtr< ShaderProgram > m_depth_pass_program;
 	SharedPtr< ShaderProgram > m_gbuf_program;

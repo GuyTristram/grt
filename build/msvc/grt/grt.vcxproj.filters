@@ -242,5 +242,8 @@
     <ClCompile Include="..\..\..\src\math\frustum.cpp">
       <Filter>Source Files\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\core\indexbuffer.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

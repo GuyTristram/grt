@@ -38,6 +38,7 @@ template< typename T >                  bool operator==( vec3<T> const &a, vec3<
 template< typename T >                  bool operator!=( vec3<T> const &a, vec3<T> const & b );
 
 template< typename T >                  T length( vec3<T> const &v );
+template< typename T >                  T length_sqr( vec3<T> const &v );
 template< typename T >                  T manhattan( vec3<T> const &v );
 template< typename T >                  vec3<T> unit( vec3<T> const &v );
 template< typename T >                  vec3<T> cross( vec3<T> const &a, vec3<T> const &b );
@@ -100,6 +101,12 @@ template< typename T >
 T length( vec3<T> const &v )
 {
 	return T( sqrt( v.x * v.x + v.y * v.y + v.z * v.z ) );
+}
+
+template< typename T >
+T length_sqr( vec3<T> const &v )
+{
+	return T( v.x * v.x + v.y * v.y + v.z * v.z );
 }
 
 template< typename T >

@@ -29,8 +29,8 @@ public:
 		Always
 	};
 
-	explicit RenderState( BlendMode blend_mode = Opaque ); //,
-	// bool double_sided = false );
+	explicit RenderState( BlendMode blend_mode = Opaque );
+	~RenderState();
 
 	void blend_mode( BlendMode mode );
 

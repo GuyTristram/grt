@@ -226,7 +226,10 @@ SharedPtr< Texture2D > ResourcePool::texture2d( char const *filename )
 	StbLoader loader( filename );
 
 	if( !loader.data )
+	{
+		printf( "Error: unable to load texture %s\n", filename );
 		return Texture2D::Ptr();
+	}
 
 	Texture2D::Ptr new_tex( new Texture2D( loader.x, loader.y, loader.n, ( void * )loader.data ) );
 

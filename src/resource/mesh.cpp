@@ -10,7 +10,11 @@ void Mesh::draw( ShaderProgram &sp, RenderState &rs, RenderTarget &rt )
 
 Mesh make_cube()
 {
-	Mesh mesh;
+	static Mesh mesh;
+	static bool init = false;
+	if( init )
+		return mesh;
+	init = true;
 	mesh.type = RenderTarget::Triangles;
 	mesh.vb = VertexBuffer::Ptr( new VertexBuffer );
 	mesh.ib = IndexBuffer::Ptr( new IndexBuffer );
