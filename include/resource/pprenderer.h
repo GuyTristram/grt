@@ -12,6 +12,8 @@
 #include "resource/mesh.h"
 #include "resource/scenenode.h"
 
+#include <map>
+
 class Device;
 class Material;
 class ResourcePool;
@@ -38,7 +40,7 @@ public:
 	virtual void visit( SceneLight &light );
 
 private:
-	static const int SHADOW_SIZE = 256;
+	//static const int SHADOW_SIZE = 2048;
 	void update_light( SceneLight &light );
 	void draw_meshes( ShaderProgram &p, RenderState &s, RenderTarget &t, Frustum const &f, float44 const &projected_from_world );
 
@@ -59,8 +61,12 @@ private:
 	SharedPtr< TextureTarget > m_near_shadow_target;
 	SharedPtr< TextureTarget > m_far_shadow_target;
 
-	SharedPtr< Texture2D > m_near_light_texture;
-	SharedPtr< Texture2D > m_far_light_texture;
+	struct TempMaps
+	{
+		SharedPtr< Texture2D > near_light_texture;
+		SharedPtr< Texture2D > far_light_texture;
+	};
+	std::map< int, TempMaps > m_temp_maps;
 
 	UniformGroup m_shadow_uniforms;
 	UniformGroup m_light_uniforms;

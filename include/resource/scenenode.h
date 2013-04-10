@@ -90,16 +90,18 @@ public:
 
 	SceneLight() :
 		position( 0.f, 0.f, 0.f, 1.f ),
-		colour( 10.f, 10.f, 10.f, 10.f ),
-		radius( 20.f ),
+		colour( 2.f, 2.f, 2.f, 1.f ),
+		radius( 10.f ),
 		dirty( true ),
-		casts_shadows( true ) {}
+		casts_shadows( true ),
+		shadow_map_size( 256 ) {}
 
 	float4 position;
 	float4 colour;
 	float radius;
 	bool dirty;
 	bool casts_shadows;
+	int shadow_map_size;
 	SharedPtr< TextureCube > shadow_map;
 
 	virtual void accept( SceneNodeVisitor &visitor );

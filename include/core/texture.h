@@ -39,7 +39,7 @@ class TextureCube : public PixelBuffer
 public:
 	typedef SharedPtr< TextureCube > Ptr;
 
-	TextureCube( int width, int height, int channels,
+	TextureCube( int size, int channels,
 	             void *pos_x, void *neg_x,
 	             void *pos_y, void *neg_y,
 	             void *pos_z, void *neg_z,

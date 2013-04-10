@@ -31,8 +31,6 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	SharedPtr< Texture2D > normalTexture( new Texture2D( w, h, 3, 0, "c" ) );
 	SharedPtr< Texture2D > lightTexture( new Texture2D( w, h, 4, 0, "cs" ) );
 	SharedPtr< Texture2D > hdrTexture( new Texture2D( w, h, 3, 0, "cs" ) );
-	m_near_light_texture.set( new Texture2D( SHADOW_SIZE, SHADOW_SIZE, 1,  0, "dfc" ) );
-	m_far_light_texture.set( new Texture2D( SHADOW_SIZE, SHADOW_SIZE, 1,  0, "dfc" ) );
 
 	m_depth_pass_target->attach( depthTexture, TextureTarget::Depth );
 	m_depth_pass_target->is_complete();
@@ -49,18 +47,13 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	m_hdr_target->attach( hdrTexture );
 	m_hdr_target->is_complete();
 
-	m_near_shadow_target->attach( m_near_light_texture, TextureTarget::Depth );
-	m_near_shadow_target->is_complete();
-
-	m_far_shadow_target->attach( m_far_light_texture, TextureTarget::Depth );
-	m_far_shadow_target->is_complete();
-
 	m_light_uniforms.set( "u_depth", depthTexture );
 	m_light_uniforms.set( "u_normal", normalTexture );
 
 	m_shade_uniforms.set( "u_light", lightTexture );
 
 	m_hdr_uniforms.set( "u_texture", hdrTexture );
+	m_hdr_uniforms.set( "u_depth_texture", depthTexture );
 
 	m_depth_pass_program       = pool.shader_program( "depth_pass.sp" );
 	m_gbuf_program             = pool.shader_program( "draw_normals.sp" );
@@ -223,6 +216,7 @@ void PPRenderer::render( Device &device,
 		m_light_sh_program->set( m_light_uniforms );
 		m_light_sh_program->set( "u_light_position", m_lights[i]->position );
 		m_light_sh_program->set( "u_light_colour", m_lights[i]->colour );
+		m_light_sh_program->set( "u_light_radius", m_lights[i]->radius );
 		m_light_sh_program->set( "u_light_radius2", m_lights[i]->radius * m_lights[i]->radius );
 		m_light_sh_program->set( "u_light_radius2rec", 1.f / ( m_lights[i]->radius * m_lights[i]->radius ) );
 		m_light_sh_program->set( "u_shadow", m_lights[i]->shadow_map );
@@ -257,9 +251,9 @@ void PPRenderer::render( Device &device,
 
 	RenderState rs_quad;
 
-	rs_quad.depth_test( false );
-	rs_quad.depth_write( false );
-	device.clear();
+	rs_quad.depth_test( true );
+	rs_quad.depth_compare( RenderState::Less );
+	rs_quad.depth_write( true );
 
 	m_quad.draw( *m_hdr_program, rs_quad, device );
 }
@@ -281,10 +275,25 @@ void PPRenderer::update_light( SceneLight &light )
 {
 	if( light.dirty )
 	{
+		int size = light.shadow_map_size;
 		if( !light.shadow_map )
 		{
-			light.shadow_map.set( new TextureCube( SHADOW_SIZE, SHADOW_SIZE, 1, 0, 0, 0, 0, 0, 0, "dsc" ) );
+			light.shadow_map.set( new TextureCube( size, 1, 0, 0, 0, 0, 0, 0, "dsc" ) );
 		}
+
+		auto temp_map = m_temp_maps.find( size );
+		if( temp_map == m_temp_maps.end() )
+		{
+			temp_map = m_temp_maps.insert( std::make_pair( size, TempMaps() ) ).first;
+			temp_map->second.near_light_texture.set( new Texture2D( size, size, 1,  0, "dfc" ) );
+			temp_map->second.far_light_texture.set(  new Texture2D( size, size, 1,  0, "dfc" ) );
+		}
+		SharedPtr< Texture2D > near_light_texture = temp_map->second.near_light_texture;
+		SharedPtr< Texture2D > far_light_texture = temp_map->second.far_light_texture;
+
+		m_near_shadow_target->attach( near_light_texture, TextureTarget::Depth );
+		m_far_shadow_target->attach( far_light_texture, TextureTarget::Depth );
+
 		float44 proj = perspective( 1.57079632f, 1.f, light.radius / 100.f, light.radius );
 		float4 dir[6] = { float4( 1,0,0,0 ), float4( -1,0,0,0 ),
 		                  float4( 0,1,0,0 ), float4( 0,-1,0,0 ),
@@ -334,8 +343,8 @@ void PPRenderer::update_light( SceneLight &light )
 			m_shadow_state.draw_back( false );
 			m_shadow_state.draw_front( true );
 			m_shadow_target->clear( false, true );
-			m_shadow_combine_program->set( "u_near_depth", m_near_light_texture );
-			m_shadow_combine_program->set( "u_far_depth", m_far_light_texture );
+			m_shadow_combine_program->set( "u_near_depth", near_light_texture );
+			m_shadow_combine_program->set( "u_far_depth", far_light_texture );
 			m_shadow_combine_program->set( "u_near", light.radius / 100.f );
 			m_shadow_combine_program->set( "u_far", light.radius );
 			m_quad.draw( *m_shadow_combine_program, m_shadow_state, *m_shadow_target );

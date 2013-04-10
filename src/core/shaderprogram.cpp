@@ -36,16 +36,20 @@ GLuint compile( GLenum type, char const *source )
 ShaderProgram const *g_last_shader = 0;
 }
 
-ShaderProgram::ShaderProgram( char const *vertex_source, char const *fragment_source ) : m_program( 0 )
+ShaderProgram::ShaderProgram( char const *vertex_source, char const *fragment_source, char const *geometry_source ) : m_program( 0 )
 {
 	GLuint vert_shader = compile( GL_VERTEX_SHADER, vertex_source );
 	GLuint frag_shader = compile( GL_FRAGMENT_SHADER, fragment_source );
+	GLuint geom_shader = geometry_source ? compile( GL_GEOMETRY_SHADER, fragment_source ) : 0;
 
 	if( vert_shader && frag_shader )
 	{
 		m_program = glCreateProgram();
 		glAttachShader( m_program, vert_shader );
 		glAttachShader( m_program, frag_shader );
+		if( geom_shader )
+			glAttachShader( m_program, geom_shader );
+
 		glLinkProgram( m_program );
 
 		GLint status;

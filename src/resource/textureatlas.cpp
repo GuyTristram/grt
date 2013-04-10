@@ -61,7 +61,7 @@ TextureAtlas::TextureAtlas( std::vector< std::string > const &sources,
 	    atlas_height <= max_atlas_size )
 	{
 		//m_texture.set( new Texture2D( atlas_width, atlas_height, n_channels ) );
-		m_texture = Texture2D::Ptr( new Texture2D( atlas_width, atlas_height, n_channels ) );
+		m_texture = Texture2D::Ptr( new Texture2D( atlas_width, atlas_height, n_channels, 0, "c" ) );
 		m_mult = float2( 1.f / float( atlas_width ), 1.f / float( atlas_height ) );
 
 		ShaderProgram::Ptr program = ResourcePool::stock().shader_program( "atlas.sp" );

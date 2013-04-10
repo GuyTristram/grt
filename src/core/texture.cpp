@@ -120,6 +120,7 @@ Texture2D::Texture2D( int width, int height, int channels, void *data, char cons
 	glTexImage2D( GL_TEXTURE_2D, 0, int_format, width, height, 0, format, type, data );
 
 	glGenerateMipmap( GL_TEXTURE_2D );
+	glBindTexture( GL_TEXTURE_2D, 0 );
 
 }
 
@@ -141,12 +142,12 @@ void Texture2D::gen_mipmaps()
 	glGenerateMipmap( GL_TEXTURE_2D );
 }
 
-TextureCube::TextureCube( int width, int height, int channels,
+TextureCube::TextureCube( int size, int channels,
                           void *pos_x, void *neg_x,
                           void *pos_y, void *neg_y,
                           void *pos_z, void *neg_z,
                           char const *options )
-	: PixelBuffer( width, height )
+	: PixelBuffer( size, size )
 {
 	glGenTextures( 1, &m_id );
 	glBindTexture( GL_TEXTURE_CUBE_MAP, m_id );
@@ -159,12 +160,12 @@ TextureCube::TextureCube( int width, int height, int channels,
 	             wrap_s, wrap_t,
 	             min_filter, max_filter );
 
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, int_format, width, height, 0, format, GL_UNSIGNED_BYTE, pos_x );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, int_format, width, height, 0, format, GL_UNSIGNED_BYTE, neg_x );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, int_format, width, height, 0, format, GL_UNSIGNED_BYTE, pos_y );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, int_format, width, height, 0, format, GL_UNSIGNED_BYTE, neg_y );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, int_format, width, height, 0, format, GL_UNSIGNED_BYTE, pos_z );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, int_format, width, height, 0, format, GL_UNSIGNED_BYTE, neg_z );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, pos_x );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, neg_x );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, pos_y );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, neg_y );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, pos_z );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, neg_z );
 
 	glGenerateMipmap( GL_TEXTURE_CUBE_MAP );
 	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -176,6 +177,7 @@ TextureCube::TextureCube( int width, int height, int channels,
 	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE );
 	glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL );
 	//glTexParameteri( GL_TEXTURE_CUBE_MAP, GL_DEPTH_STENCIL_TEXTURE_MODE  , GL_LUMINANCE );
+	glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
 
 }
 

@@ -10,7 +10,9 @@ class ShaderProgram : public Shared
 {
 public:
 	typedef SharedPtr< ShaderProgram > Ptr;
-	ShaderProgram( char const *vertex_source, char const *fragment_source );
+	ShaderProgram( char const *vertex_source,
+	               char const *fragment_source,
+	               char const *geometry_source = 0 );
 	~ShaderProgram();
 
 	void bind() const;
