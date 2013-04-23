@@ -278,15 +278,15 @@ void PPRenderer::update_light( SceneLight &light )
 		int size = light.shadow_map_size;
 		if( !light.shadow_map )
 		{
-			light.shadow_map.set( new TextureCube( size, 1, 0, 0, 0, 0, 0, 0, "dsc" ) );
+			light.shadow_map.set( new TextureCube( size, 1, 0, 0, 0, 0, 0, 0, "dscp1" ) );
 		}
 
 		auto temp_map = m_temp_maps.find( size );
 		if( temp_map == m_temp_maps.end() )
 		{
 			temp_map = m_temp_maps.insert( std::make_pair( size, TempMaps() ) ).first;
-			temp_map->second.near_light_texture.set( new Texture2D( size, size, 1,  0, "dfc" ) );
-			temp_map->second.far_light_texture.set(  new Texture2D( size, size, 1,  0, "dfc" ) );
+			temp_map->second.near_light_texture.set( new Texture2D( size, size, 1,  0, "dfc1" ) );
+			temp_map->second.far_light_texture.set(  new Texture2D( size, size, 1,  0, "dfc1" ) );
 		}
 		SharedPtr< Texture2D > near_light_texture = temp_map->second.near_light_texture;
 		SharedPtr< Texture2D > far_light_texture = temp_map->second.far_light_texture;

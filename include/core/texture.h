@@ -7,11 +7,33 @@ class PixelBuffer : public Shared
 {
 public:
 	PixelBuffer( int width, int height ) : m_width( width ), m_height( height ) {}
+	virtual ~PixelBuffer() {}
+
 	int width() const { return m_width; }
 	int height() const { return m_height; }
 private:
 	int m_width;
 	int m_height;
+};
+
+class Texture : public PixelBuffer
+{
+public:
+	Texture( int target, int width, int height, int channels );
+	~Texture();
+
+	void bind( int unit );
+
+	int channels() const;
+
+	void gen_mipmaps();
+
+	friend class TextureTarget;
+
+private:
+	unsigned int m_target;
+	unsigned int m_id;
+	int m_channels;
 };
 
 class Texture2D : public PixelBuffer
@@ -45,6 +67,24 @@ public:
 	             void *pos_z, void *neg_z,
 	             char const *options = 0 );
 	~TextureCube();
+
+	void bind( int unit );
+
+	void gen_mipmaps();
+
+	friend class TextureTarget;
+private:
+	unsigned int m_id;
+};
+
+class Texture3D : public PixelBuffer
+{
+public:
+	typedef SharedPtr< Texture3D > Ptr;
+
+	Texture3D( int width, int height, int depth, int channels,
+	           void *data, char const *options = 0 );
+	~Texture3D();
 
 	void bind( int unit );
 

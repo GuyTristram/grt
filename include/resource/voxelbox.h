@@ -128,32 +128,39 @@ void traverse( float3 position, float3 const &dir, F &func )
 	float3 dt1; // Time between ray hitting consecutive planes in each direction
 	for( int i = 0; i != 3; ++i )
 	{
-		if( dir[i] > 0.f )
+		if( dir[i] > FLT_MIN )
 		{
 			dt1[i] = 1.f / dir[i];
 			dt[i] = dt1[i] * ( floor( position[i] ) - position[i] + 1 );
 			idir[i] = 1;
 		}
-		else if( dir[i] < 0.f )
+		else if( dir[i] < -FLT_MIN )
 		{
 			dt1[i] = -1.f / dir[i];
 			dt[i] = dt1[i] * ( position[i] - floor( position[i] ) );
 			idir[i] = -1;
 		}
+		else
+		{
+			dt[i] = dt1[i] = FLT_MAX;
+		}
 	}
 
 	do
 	{
-		int next = -1;
-		float next_time = 1000.f;
-		for( int i = 0; i != 3; ++i )
+		int next = 2;
+		if( dt[0] < dt[1] )
 		{
-			if( dir[i] != 0.f && dt[i] < next_time )
-			{
-				next = i;
-				next_time = dt[i];
-			}
+			if( dt[0] < dt[2] )
+				next = 0;
 		}
+		else
+		{
+			if( dt[1] < dt[2] )
+				next = 1;
+		}
+
+		float next_time = dt[next];
 
 		position += dir * next_time;
 

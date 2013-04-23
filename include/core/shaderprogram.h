@@ -12,7 +12,9 @@ public:
 	typedef SharedPtr< ShaderProgram > Ptr;
 	ShaderProgram( char const *vertex_source,
 	               char const *fragment_source,
-	               char const *geometry_source = 0 );
+	               char const *geometry_source = 0,
+	               char const *control_source = 0,
+	               char const *evaluation_source = 0 );
 	~ShaderProgram();
 
 	void bind() const;

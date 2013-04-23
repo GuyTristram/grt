@@ -95,8 +95,8 @@ template<>           struct UniformType< float22 >          {static int type() {
 template<>           struct UniformType< float33 >          {static int type() {return GL_FLOAT_MAT3;} };
 template<>           struct UniformType< float44 >          {static int type() {return GL_FLOAT_MAT4;} };
 template<>           struct UniformType< Texture2D::Ptr >   {static int type() {return GL_SAMPLER_2D;} };
+template<>           struct UniformType< Texture3D::Ptr >   {static int type() {return GL_SAMPLER_3D;} };
 template<>           struct UniformType< TextureCube::Ptr > {static int type() {return GL_SAMPLER_CUBE;} };
-//template<typename T> struct UniformType< const std::vector< T > > {static int type() {return UniformType< T >::type();}};
 template<typename T> struct UniformType< std::vector< T > > {static int type() {return UniformType< T >::type();}};
 
 // UniformArrayInfo is another traits-type class, providing information on
@@ -144,6 +144,10 @@ inline void set_texture( int location, T const &data, int tex_unit, int size )
 	}
 }
 inline void set( int location, Texture2D::Ptr const &data, int tex_unit, int size )
+{
+	set_texture( location, data, tex_unit, size );
+}
+inline void set( int location, Texture3D::Ptr const &data, int tex_unit, int size )
 {
 	set_texture( location, data, tex_unit, size );
 }

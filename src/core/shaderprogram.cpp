@@ -6,6 +6,7 @@
 
 namespace
 {
+
 GLuint compile( GLenum type, char const *source )
 {
 	GLuint shader;
@@ -24,7 +25,6 @@ GLuint compile( GLenum type, char const *source )
 			GLchar *log = ( GLchar * )malloc( log_length );
 			glGetShaderInfoLog( shader, log_length, &log_length, log );
 			printf( log );
-			//NSLog(@"Shader compile log:\n%s", log);
 			free( log );
 		}
 		glDeleteShader( shader );
@@ -36,11 +36,17 @@ GLuint compile( GLenum type, char const *source )
 ShaderProgram const *g_last_shader = 0;
 }
 
-ShaderProgram::ShaderProgram( char const *vertex_source, char const *fragment_source, char const *geometry_source ) : m_program( 0 )
+ShaderProgram::ShaderProgram( char const *vertex_source,
+                              char const *fragment_source,
+                              char const *geometry_source,
+	                          char const *control_source,
+	                          char const *evaluation_source ) : m_program( 0 )
 {
 	GLuint vert_shader = compile( GL_VERTEX_SHADER, vertex_source );
 	GLuint frag_shader = compile( GL_FRAGMENT_SHADER, fragment_source );
-	GLuint geom_shader = geometry_source ? compile( GL_GEOMETRY_SHADER, fragment_source ) : 0;
+	GLuint geom_shader = geometry_source   ? compile( GL_GEOMETRY_SHADER, geometry_source ) : 0;
+	GLuint ctrl_shader = control_source    ? compile( GL_TESS_CONTROL_SHADER, control_source ) : 0;
+	GLuint eval_shader = evaluation_source ? compile( GL_TESS_EVALUATION_SHADER, evaluation_source ) : 0;
 
 	if( vert_shader && frag_shader )
 	{
@@ -49,6 +55,10 @@ ShaderProgram::ShaderProgram( char const *vertex_source, char const *fragment_so
 		glAttachShader( m_program, frag_shader );
 		if( geom_shader )
 			glAttachShader( m_program, geom_shader );
+		if( ctrl_shader )
+			glAttachShader( m_program, ctrl_shader );
+		if( eval_shader )
+			glAttachShader( m_program, eval_shader );
 
 		glLinkProgram( m_program );
 
@@ -157,6 +167,7 @@ void ShaderProgram::bind() const
 		m_uniform_locations[i].info->location = m_uniform_locations[i].location;
 		m_uniform_locations[i].info->count = m_uniform_locations[i].count;
 		if( m_uniform_locations[i].info->type == GL_SAMPLER_2D ||
+		    m_uniform_locations[i].info->type == GL_SAMPLER_3D ||
 		    m_uniform_locations[i].info->type == GL_SAMPLER_CUBE )
 		{
 			m_uniform_locations[i].info->texture_unit = texture_unit;
