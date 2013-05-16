@@ -99,13 +99,12 @@ void Texture::gen_mipmaps()
 
 
 Texture2D::Texture2D( int width, int height, int channels, void *data, char const *options )
-	: PixelBuffer( width, height ), m_channels( channels )
+	: Texture( GL_TEXTURE_2D, width, height, channels )
 {
-	glGenTextures( 1, &m_id );
-	glBindTexture( GL_TEXTURE_2D, m_id );
 
 	GLenum type, format, int_format;
 	bool is_mipmapped;
+
 	tex_params( GL_TEXTURE_2D, channels, options,
                 int_format, format, type, is_mipmapped );
 
@@ -117,34 +116,32 @@ Texture2D::Texture2D( int width, int height, int channels, void *data, char cons
 
 }
 
-Texture2D::~Texture2D()
-{
-	glDeleteTextures( 1, &m_id );
-}
 
-void Texture2D::bind( int unit )
+Texture2DArray::Texture2DArray( int width, int height, int size, int channels, void *data, char const *options )
+	: Texture( GL_TEXTURE_2D_ARRAY, width, height, channels )
 {
-	glActiveTexture( GL_TEXTURE0 + unit );
-	//glEnable( GL_TEXTURE_2D );
-	glBindTexture( GL_TEXTURE_2D, m_id );
-}
-
-void Texture2D::gen_mipmaps()
-{
-	glBindTexture( GL_TEXTURE_2D, m_id );
-	glGenerateMipmap( GL_TEXTURE_2D );
-}
-
-
-Texture3D::Texture3D( int width, int height, int depth, int channels, void *data, char const *options )
-	: PixelBuffer( width, height )
-{
-	glGenTextures( 1, &m_id );
-	glBindTexture( GL_TEXTURE_3D, m_id );
 
 	GLenum type, format, int_format;
-
 	bool is_mipmapped;
+
+	tex_params( GL_TEXTURE_2D_ARRAY, channels, options,
+                int_format, format, type, is_mipmapped );
+
+	glTexImage3D( GL_TEXTURE_2D_ARRAY, 0, int_format, width, height, size, 0, format, type, data );
+
+	if( is_mipmapped )//&& data )
+		glGenerateMipmap( GL_TEXTURE_2D_ARRAY );
+	glBindTexture( GL_TEXTURE_2D_ARRAY, 0 );
+
+}
+
+Texture3D::Texture3D( int width, int height, int depth, int channels, void *data, char const *options )
+	: Texture( GL_TEXTURE_3D, width, height, channels )
+{
+
+	GLenum type, format, int_format;
+	bool is_mipmapped;
+
 	tex_params( GL_TEXTURE_3D, channels, options,
                 int_format, format, type, is_mipmapped );
 
@@ -156,37 +153,16 @@ Texture3D::Texture3D( int width, int height, int depth, int channels, void *data
 
 }
 
-Texture3D::~Texture3D()
-{
-	glDeleteTextures( 1, &m_id );
-}
-
-void Texture3D::bind( int unit )
-{
-	glActiveTexture( GL_TEXTURE0 + unit );
-	//glEnable( GL_TEXTURE_2D );
-	glBindTexture( GL_TEXTURE_3D, m_id );
-}
-
-void Texture3D::gen_mipmaps()
-{
-	glBindTexture( GL_TEXTURE_3D, m_id );
-	glGenerateMipmap( GL_TEXTURE_3D );
-}
-
 TextureCube::TextureCube( int size, int channels,
                           void *pos_x, void *neg_x,
                           void *pos_y, void *neg_y,
                           void *pos_z, void *neg_z,
                           char const *options )
-	: PixelBuffer( size, size )
+	: Texture( GL_TEXTURE_CUBE_MAP, size, size, channels )
 {
-	glGenTextures( 1, &m_id );
-	glBindTexture( GL_TEXTURE_CUBE_MAP, m_id );
-
 	GLenum type, format, int_format;
-
 	bool is_mipmapped;
+
 	tex_params( GL_TEXTURE_CUBE_MAP, channels, options,
                 int_format, format, type, is_mipmapped );
 
@@ -202,22 +178,3 @@ TextureCube::TextureCube( int size, int channels,
 
 	glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
 }
-
-TextureCube::~TextureCube()
-{
-	glDeleteTextures( 1, &m_id );
-}
-
-void TextureCube::bind( int unit )
-{
-	glActiveTexture( GL_TEXTURE0 + unit );
-	glEnable( GL_TEXTURE_CUBE_MAP );
-	glBindTexture( GL_TEXTURE_CUBE_MAP, m_id );
-}
-
-void TextureCube::gen_mipmaps()
-{
-	glBindTexture( GL_TEXTURE_CUBE_MAP, m_id );
-	//glGenerateMipmap( GL_TEXTURE_CUBE_MAP );
-}
-

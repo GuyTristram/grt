@@ -8,6 +8,7 @@
 #include <vector>
 
 class Texture2D;
+class Texture2DArray;
 class TextureCube;
 class ShaderProgram;
 class Font;
@@ -23,6 +24,7 @@ public:
 
 	SharedPtr< ShaderProgram > shader_program( char const *filename );
 	SharedPtr< Texture2D > texture2d( char const *filename );
+	SharedPtr< Texture2DArray > texture2d_array( std::vector< std::string > const &filenames, int size );
 	SharedPtr< TextureCube > texture_cube( char const *filename, char const *ext );
 	SharedPtr< Font > font( char const *filename, int size );
 	SharedPtr< Image > image( char const *filename );

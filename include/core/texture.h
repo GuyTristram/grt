@@ -36,27 +36,24 @@ private:
 	int m_channels;
 };
 
-class Texture2D : public PixelBuffer
+class Texture2D : public Texture
 {
 public:
 	typedef SharedPtr< Texture2D > Ptr;
 
 	Texture2D( int width, int height, int channels, void *data = 0, char const *options = 0 );
-	~Texture2D();
-
-	void bind( int unit );
-
-	int channels() const {return m_channels;}
-
-	void gen_mipmaps();
-
-	friend class TextureTarget;
-private:
-	unsigned int m_id;
-	int m_channels;
 };
 
-class TextureCube : public PixelBuffer
+
+class Texture2DArray : public Texture
+{
+public:
+	typedef SharedPtr< Texture2DArray > Ptr;
+
+	Texture2DArray( int width, int height, int size, int channels, void *data = 0, char const *options = 0 );
+};
+
+class TextureCube : public Texture
 {
 public:
 	typedef SharedPtr< TextureCube > Ptr;
@@ -66,33 +63,15 @@ public:
 	             void *pos_y, void *neg_y,
 	             void *pos_z, void *neg_z,
 	             char const *options = 0 );
-	~TextureCube();
-
-	void bind( int unit );
-
-	void gen_mipmaps();
-
-	friend class TextureTarget;
-private:
-	unsigned int m_id;
 };
 
-class Texture3D : public PixelBuffer
+class Texture3D : public Texture
 {
 public:
 	typedef SharedPtr< Texture3D > Ptr;
 
 	Texture3D( int width, int height, int depth, int channels,
 	           void *data, char const *options = 0 );
-	~Texture3D();
-
-	void bind( int unit );
-
-	void gen_mipmaps();
-
-	friend class TextureTarget;
-private:
-	unsigned int m_id;
 };
 
 #endif // TEXTURE_H

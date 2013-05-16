@@ -49,3 +49,40 @@ void UniformGroup::bind() const
 	for( auto uni = m_uniforms.begin(); uni != m_uniforms.end(); ++uni )
 		( *uni )->bind();
 }
+
+
+namespace UniformSetters
+{
+
+template< typename T >
+inline void set_texture( int location, T const &data, int tex_unit, int size )
+{
+	if( location < 0 )
+		return;
+
+	if( size > 1 )
+	{
+		std::vector<int> tex_units( size );
+		T const *tex = &data;
+		for( int i = 0; i < size; ++i )
+		{
+			tex_units[i] = tex_unit + i;
+			if( tex->get() )
+				( *tex )->bind( tex_unit );
+			++tex;
+		}
+		set( location, tex_units[0], 0, size );
+	}
+	else
+	{
+		set( location, tex_unit, 0, 1 );
+		if( data.get() )
+			data->bind( tex_unit );
+	}
+}
+
+void set( int location, Texture2D::Ptr const &data, int tex_unit, int size )      {set_texture( location, data, tex_unit, size );}
+void set( int location, Texture2DArray::Ptr const &data, int tex_unit, int size ) {set_texture( location, data, tex_unit, size );}
+void set( int location, Texture3D::Ptr const &data, int tex_unit, int size )      {set_texture( location, data, tex_unit, size );}
+void set( int location, TextureCube::Ptr const &data, int tex_unit, int size )    {set_texture( location, data, tex_unit, size );}
+}

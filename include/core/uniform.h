@@ -86,18 +86,19 @@ struct UniformInfo
 template< typename T >
 struct UniformType {};
 
-template<>           struct UniformType< int >              {static int type() {return GL_INT;} };
-template<>           struct UniformType< float >            {static int type() {return GL_FLOAT;} };
-template<>           struct UniformType< float2 >           {static int type() {return GL_FLOAT_VEC2;} };
-template<>           struct UniformType< float3 >           {static int type() {return GL_FLOAT_VEC3;} };
-template<>           struct UniformType< float4 >           {static int type() {return GL_FLOAT_VEC4;} };
-template<>           struct UniformType< float22 >          {static int type() {return GL_FLOAT_MAT2;} };
-template<>           struct UniformType< float33 >          {static int type() {return GL_FLOAT_MAT3;} };
-template<>           struct UniformType< float44 >          {static int type() {return GL_FLOAT_MAT4;} };
-template<>           struct UniformType< Texture2D::Ptr >   {static int type() {return GL_SAMPLER_2D;} };
-template<>           struct UniformType< Texture3D::Ptr >   {static int type() {return GL_SAMPLER_3D;} };
-template<>           struct UniformType< TextureCube::Ptr > {static int type() {return GL_SAMPLER_CUBE;} };
-template<typename T> struct UniformType< std::vector< T > > {static int type() {return UniformType< T >::type();}};
+template<>           struct UniformType< int >                 {static int type() {return GL_INT;} };
+template<>           struct UniformType< float >               {static int type() {return GL_FLOAT;} };
+template<>           struct UniformType< float2 >              {static int type() {return GL_FLOAT_VEC2;} };
+template<>           struct UniformType< float3 >              {static int type() {return GL_FLOAT_VEC3;} };
+template<>           struct UniformType< float4 >              {static int type() {return GL_FLOAT_VEC4;} };
+template<>           struct UniformType< float22 >             {static int type() {return GL_FLOAT_MAT2;} };
+template<>           struct UniformType< float33 >             {static int type() {return GL_FLOAT_MAT3;} };
+template<>           struct UniformType< float44 >             {static int type() {return GL_FLOAT_MAT4;} };
+template<>           struct UniformType< Texture2D::Ptr >      {static int type() {return GL_SAMPLER_2D;} };
+template<>           struct UniformType< Texture2DArray::Ptr > {static int type() {return GL_SAMPLER_2D_ARRAY;} };
+template<>           struct UniformType< Texture3D::Ptr >      {static int type() {return GL_SAMPLER_3D;} };
+template<>           struct UniformType< TextureCube::Ptr >    {static int type() {return GL_SAMPLER_CUBE;} };
+template<typename T> struct UniformType< std::vector< T > >    {static int type() {return UniformType< T >::type();}};
 
 // UniformArrayInfo is another traits-type class, providing information on
 // whether a uniform derived class is instanciated on a vector class or not.
@@ -117,44 +118,10 @@ inline void set( int location, float33 const &data, int tex_unit, int size ) { g
 inline void set( int location, float44 const &data, int tex_unit, int size ) { glUniformMatrix4fv( location, size, false, &data.i.x ); }
 inline void set( int location, int     const &data, int tex_unit, int size ) { glUniform1iv( location, size, &data ); }
 
-template< typename T >
-inline void set_texture( int location, T const &data, int tex_unit, int size )
-{
-	if( location < 0 )
-		return;
-
-	if( size > 1 )
-	{
-		std::vector<int> tex_units( size );
-		T const *tex = &data;
-		for( int i = 0; i < size; ++i )
-		{
-			tex_units[i] = tex_unit + i;
-			if( tex->get() )
-				( *tex )->bind( tex_unit );
-			++tex;
-		}
-		set( location, tex_units[0], 0, size );
-	}
-	else
-	{
-		set( location, tex_unit, 0, 1 );
-		if( data.get() )
-			data->bind( tex_unit );
-	}
-}
-inline void set( int location, Texture2D::Ptr const &data, int tex_unit, int size )
-{
-	set_texture( location, data, tex_unit, size );
-}
-inline void set( int location, Texture3D::Ptr const &data, int tex_unit, int size )
-{
-	set_texture( location, data, tex_unit, size );
-}
-inline void set( int location, TextureCube::Ptr const &data, int tex_unit, int size )
-{
-	set_texture( location, data, tex_unit, size );
-}
+void set( int location, Texture2D::Ptr const &data, int tex_unit, int size );
+void set( int location, Texture2DArray::Ptr const &data, int tex_unit, int size );
+void set( int location, Texture3D::Ptr const &data, int tex_unit, int size );
+void set( int location, TextureCube::Ptr const &data, int tex_unit, int size );
 
 template< typename T >
 inline void set( int location, std::vector< T > const &data, int tex_unit, int size )

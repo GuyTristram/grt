@@ -56,10 +56,10 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	m_hdr_uniforms.set( "u_depth_texture", depthTexture );
 
 	m_depth_pass_program       = pool.shader_program( "depth_pass.sp" );
-	m_gbuf_program             = pool.shader_program( "draw_normals.sp" );
+	m_gbuf_program             = pool.shader_program( "draw_normals_ar.sp" );
 	m_light_program            = pool.shader_program( "draw_lights.sp" );
 	m_light_sh_program         = pool.shader_program( "draw_lights_sh.sp" );
-	m_shade_program            = pool.shader_program( "use_light_map.sp" );
+	m_shade_program            = pool.shader_program( "use_light_map_ar.sp" );
 	m_hdr_program              = pool.shader_program( "hdr.sp" );
 	m_shadow_program           = pool.shader_program( "draw_shadow_map.sp" );
 	m_shadow_combine_program   = pool.shader_program( "combine_shadow_maps.sp" );
@@ -264,6 +264,7 @@ void PPRenderer::draw_meshes( ShaderProgram &p, RenderState &s, RenderTarget &t,
 	{
 		if( f.intersect_aabb( ( *m )->aabb ) )
 		{
+			p.set( "u_t_world_from_model",  ( *m )->world_from_model() );
 			p.set( "u_t_model_view_projection",  projected_from_world * ( *m )->world_from_model() );
 			p.set( ( *m )->material->uniforms );
 			( *m )->mesh.draw( p, s, t );

@@ -4,8 +4,10 @@
 
 #include "core/shaderprogram.h"
 #include "core/texture.h"
+#include "core/texturetarget.h"
 
 #include "resource/material.h"
+#include "resource/mesh.h"
 #include "resource/font.h"
 #include "resource/image.h"
 
@@ -234,6 +236,30 @@ SharedPtr< Texture2D > ResourcePool::texture2d( char const *filename )
 	Texture2D::Ptr new_tex( new Texture2D( loader.x, loader.y, loader.n, ( void * )loader.data ) );
 
 	m_textures[ filename ] = new_tex;
+	return new_tex;
+}
+
+SharedPtr< Texture2DArray > ResourcePool::texture2d_array( std::vector< std::string > const &filenames, int size )
+{
+	ResourcePool pool;
+	int channels = pool.texture2d( filenames[0].c_str() )->channels();
+	Texture2DArray::Ptr new_tex( new Texture2DArray( size, size, filenames.size(), channels ) );
+
+	ShaderProgram::Ptr program = ResourcePool::stock().shader_program( "texturecopy.sp" );
+	TextureTarget target;
+	RenderState state;
+	state.depth_test( false );
+	Mesh quad = make_quad();
+
+	for( int i = 0; i != filenames.size(); ++i )
+	{
+		program->set( "u_source", pool.texture2d( filenames[i].c_str() ) );
+		target.attach( new_tex, i );
+		quad.draw( *program, state, target );
+	}
+	new_tex->gen_mipmaps();
+
+
 	return new_tex;
 }
 
