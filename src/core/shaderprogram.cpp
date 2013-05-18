@@ -33,7 +33,16 @@ GLuint compile( GLenum type, char const *source )
 	return shader;
 }
 
-ShaderProgram const *g_last_shader = 0;
+bool is_texture_type( int type )
+{
+	return
+		type == GL_SAMPLER_2D ||
+		type == GL_SAMPLER_2D_ARRAY ||
+		type == GL_SAMPLER_3D ||
+		type == GL_SAMPLER_CUBE;
+}
+
+ShaderProgram *g_last_shader = 0;
 }
 
 ShaderProgram::ShaderProgram( char const *vertex_source,
@@ -81,6 +90,7 @@ ShaderProgram::ShaderProgram( char const *vertex_source,
 		}
 		else
 		{
+
 			// Get vertex attribute info.
 			GLint att_count;
 			glGetProgramiv( m_program, GL_ACTIVE_ATTRIBUTES, &att_count );
@@ -97,24 +107,37 @@ ShaderProgram::ShaderProgram( char const *vertex_source,
 				    VertexBuffer::attribute_location( name );
 			}
 
-			// Get uniform info.
+			// Get uniform info. Temporarily set this as current program
+			int current_program;
+			glGetIntegerv( GL_CURRENT_PROGRAM, &current_program );
+			glUseProgram( m_program );
+
 			GLint uniform_count;
 			glGetProgramiv( m_program, GL_ACTIVE_UNIFORMS, &uniform_count );
+			int texture_count = 0;
 			for( GLint i = 0; i < uniform_count; ++i )
 			{
 				GLchar name[256];
 				GLint size;
 				GLenum type;
 				glGetActiveUniform( m_program, i, 256, 0, &size, &type, name );
+				int location = glGetUniformLocation( m_program, name );
 
 				if( type == GL_SAMPLER_CUBE_SHADOW ) type = GL_SAMPLER_CUBE;
 
+				if( is_texture_type( type ) )
+				{
+					glUniform1i( location, texture_count );
+					texture_count += size;
+				}
+
 				m_uniform_locations.push_back( UniformLocation() );
-				m_uniform_locations.back().location =
-				    glGetUniformLocation( m_program, name );
+				m_uniform_locations.back().location = location;
 				m_uniform_locations.back().count = size;
 				m_uniform_locations.back().info = UniformInfo::get( name, type );
 			}
+			glUseProgram( current_program );
+			m_bound_textures.resize( texture_count );
 		}
 	}
 	// Get uniform locations.
@@ -151,7 +174,7 @@ void ShaderProgram::set( UniformGroup const &group )
 }
 
 
-void ShaderProgram::bind() const
+void ShaderProgram::bind()
 {
 	if( g_last_shader == this )
 		return;
@@ -166,10 +189,7 @@ void ShaderProgram::bind() const
 	{
 		m_uniform_locations[i].info->location = m_uniform_locations[i].location;
 		m_uniform_locations[i].info->count = m_uniform_locations[i].count;
-		if( m_uniform_locations[i].info->type == GL_SAMPLER_2D ||
-		    m_uniform_locations[i].info->type == GL_SAMPLER_2D_ARRAY ||
-		    m_uniform_locations[i].info->type == GL_SAMPLER_3D ||
-		    m_uniform_locations[i].info->type == GL_SAMPLER_CUBE )
+		if( is_texture_type( m_uniform_locations[i].info->type ) )
 		{
 			m_uniform_locations[i].info->texture_unit = texture_unit;
 			texture_unit += m_uniform_locations[i].count;
@@ -184,6 +204,21 @@ void ShaderProgram::unbind() const
 		*m_att_locations[i].shared_location = -1;
 	for( int i = 0; i != m_uniform_locations.size(); ++i )
 		m_uniform_locations[i].info->location = -1;
+}
+
+void ShaderProgram::bind_textures()
+{
+	for( int i = 0; i < m_bound_textures.size(); ++i )
+		if( m_bound_textures[i] )
+			m_bound_textures[i]->bind( i );
+}
+
+void ShaderProgram::bind_texture_to_current_program( int unit, SharedPtr< Texture > texture )
+{
+	if( g_last_shader && unit < (int)g_last_shader->m_bound_textures.size() )
+	{
+		g_last_shader->m_bound_textures[unit] = texture;
+	}
 }
 
 ShaderProgram::Ptr const &ShaderProgram::stock_unlit()

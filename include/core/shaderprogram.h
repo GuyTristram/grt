@@ -6,6 +6,8 @@
 
 #include <vector>
 
+class Texture;
+
 class ShaderProgram : public Shared
 {
 public:
@@ -17,8 +19,10 @@ public:
 	               char const *evaluation_source = 0 );
 	~ShaderProgram();
 
-	void bind() const;
+	void bind();
 	void unbind() const;
+
+	void bind_textures();
 
 	void set( UniformBase const &uniform );
 	void set( UniformGroup const &group );
@@ -26,6 +30,9 @@ public:
 	template< typename T > void set( char const *name, T const &value );
 
 	static Ptr const &stock_unlit();
+
+	// Only for use by Uniform class
+	static void bind_texture_to_current_program( int unit, SharedPtr< Texture > texture );
 
 private:
 	int m_program;
@@ -43,6 +50,7 @@ private:
 		UniformInfo const *info;
 	};
 	std::vector< UniformLocation > m_uniform_locations;
+	std::vector< SharedPtr< Texture > > m_bound_textures;
 };
 
 

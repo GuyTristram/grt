@@ -41,6 +41,7 @@ void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type,
 	sp.bind();
 	rs.bind();
 	vb.bind();
+	sp.bind_textures();
 	glDrawElements( gl_primitive( type ), ib.count(), GL_UNSIGNED_SHORT, ib.indices() );
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER , 0 );
 	vb.unbind();
@@ -52,6 +53,7 @@ void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type,
 	sp.bind();
 	rs.bind();
 	vb.bind();
+	sp.bind_textures();
 	glDrawArrays( gl_primitive( type ), 0, vb.vertex_count() );
 	vb.unbind();
 }

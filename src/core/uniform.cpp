@@ -1,5 +1,7 @@
 #include "core/uniform.h"
 
+#include "core/shaderprogram.h"
+
 #include <string>
 #include <set>
 
@@ -62,22 +64,13 @@ inline void set_texture( int location, T const &data, int tex_unit, int size )
 
 	if( size > 1 )
 	{
-		std::vector<int> tex_units( size );
 		T const *tex = &data;
-		for( int i = 0; i < size; ++i )
-		{
-			tex_units[i] = tex_unit + i;
-			if( tex->get() )
-				( *tex )->bind( tex_unit );
-			++tex;
-		}
-		set( location, tex_units[0], 0, size );
+		for( int i = 0; i < size; ++i, ++tex )
+			ShaderProgram::bind_texture_to_current_program( tex_unit + i, *tex );
 	}
 	else
 	{
-		set( location, tex_unit, 0, 1 );
-		if( data.get() )
-			data->bind( tex_unit );
+		ShaderProgram::bind_texture_to_current_program( tex_unit, data );
 	}
 }
 

@@ -12,7 +12,8 @@ public:
 	explicit Material( ShaderProgram::Ptr const &program = ShaderProgram::stock_unlit(),
 	                   RenderState::Ptr const &state     = RenderState::stock_opaque() );
 
-	ShaderProgram::Ptr program;
+	ShaderProgram::Ptr geom_program;
+	ShaderProgram::Ptr shade_program;
 	RenderState::Ptr state;
 	UniformGroup uniforms;
 
