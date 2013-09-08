@@ -82,7 +82,6 @@ ShaderProgram::ShaderProgram( char const *vertex_source,
 				GLchar *log = ( GLchar * )malloc( log_length );
 				glGetProgramInfoLog( m_program, log_length, &log_length, log );
 				printf( log );
-				//NSLog(@"Program link log:\n%s", log);
 				free( log );
 			}
 			glDeleteProgram( m_program );
@@ -90,58 +89,10 @@ ShaderProgram::ShaderProgram( char const *vertex_source,
 		}
 		else
 		{
-
-			// Get vertex attribute info.
-			GLint att_count;
-			glGetProgramiv( m_program, GL_ACTIVE_ATTRIBUTES, &att_count );
-			for( GLint i = 0; i < att_count; ++i )
-			{
-				GLchar name[256];
-				GLint size;
-				GLenum type;
-				glGetActiveAttrib( m_program, i, 256, 0, &size, &type, name );
-
-				m_att_locations.push_back( AttributeLocation() );
-				m_att_locations.back().location = glGetAttribLocation( m_program, name );
-				m_att_locations.back().shared_location =
-				    VertexBuffer::attribute_location( name );
-			}
-
-			// Get uniform info. Temporarily set this as current program
-			int current_program;
-			glGetIntegerv( GL_CURRENT_PROGRAM, &current_program );
-			glUseProgram( m_program );
-
-			GLint uniform_count;
-			glGetProgramiv( m_program, GL_ACTIVE_UNIFORMS, &uniform_count );
-			int texture_count = 0;
-			for( GLint i = 0; i < uniform_count; ++i )
-			{
-				GLchar name[256];
-				GLint size;
-				GLenum type;
-				glGetActiveUniform( m_program, i, 256, 0, &size, &type, name );
-				int location = glGetUniformLocation( m_program, name );
-
-				if( type == GL_SAMPLER_CUBE_SHADOW ) type = GL_SAMPLER_CUBE;
-
-				if( is_texture_type( type ) )
-				{
-					glUniform1i( location, texture_count );
-					texture_count += size;
-				}
-
-				m_uniform_locations.push_back( UniformLocation() );
-				m_uniform_locations.back().location = location;
-				m_uniform_locations.back().count = size;
-				m_uniform_locations.back().info = UniformInfo::get( name, type );
-			}
-			glUseProgram( current_program );
-			m_bound_textures.resize( texture_count );
+			get_vertex_attribute_info();
+			get_uniform_info();
 		}
 	}
-	// Get uniform locations.
-	//uniforms[UNIFORM_TRANSLATE] = glGetUniformLocation(program, "translate");
 
 	// Release vertex and fragment shaders.
 	if( vert_shader )
@@ -208,7 +159,7 @@ void ShaderProgram::unbind() const
 
 void ShaderProgram::bind_textures()
 {
-	for( int i = 0; i < m_bound_textures.size(); ++i )
+	for( int i = 0; i < (int)m_bound_textures.size(); ++i )
 		if( m_bound_textures[i] )
 			m_bound_textures[i]->bind( i );
 }
@@ -258,4 +209,57 @@ ShaderProgram::Ptr const &ShaderProgram::stock_unlit()
 	                      "}\n" ) );
 
 	return unlit;
+}
+
+void ShaderProgram::get_vertex_attribute_info()
+{
+	GLint att_count;
+	glGetProgramiv( m_program, GL_ACTIVE_ATTRIBUTES, &att_count );
+	for( GLint i = 0; i < att_count; ++i )
+	{
+		GLchar name[256];
+		GLint size;
+		GLenum type;
+		glGetActiveAttrib( m_program, i, 256, 0, &size, &type, name );
+
+		m_att_locations.push_back( AttributeLocation() );
+		m_att_locations.back().location = glGetAttribLocation( m_program, name );
+		m_att_locations.back().shared_location =
+			VertexBuffer::attribute_location( name );
+	}
+}
+
+void ShaderProgram::get_uniform_info()
+{
+	// Temporarily set this as current program
+	int current_program;
+	glGetIntegerv( GL_CURRENT_PROGRAM, &current_program );
+	glUseProgram( m_program );
+
+	GLint uniform_count;
+	glGetProgramiv( m_program, GL_ACTIVE_UNIFORMS, &uniform_count );
+	int texture_count = 0;
+	for( GLint i = 0; i < uniform_count; ++i )
+	{
+		GLchar name[256];
+		GLint size;
+		GLenum type;
+		glGetActiveUniform( m_program, i, 256, 0, &size, &type, name );
+		int location = glGetUniformLocation( m_program, name );
+
+		if( type == GL_SAMPLER_CUBE_SHADOW ) type = GL_SAMPLER_CUBE;
+
+		if( is_texture_type( type ) )
+		{
+			glUniform1i( location, texture_count );
+			texture_count += size;
+		}
+
+		m_uniform_locations.push_back( UniformLocation() );
+		m_uniform_locations.back().location = location;
+		m_uniform_locations.back().count = size;
+		m_uniform_locations.back().info = UniformInfo::get( name, type );
+	}
+	glUseProgram( current_program );
+	m_bound_textures.resize( texture_count );
 }

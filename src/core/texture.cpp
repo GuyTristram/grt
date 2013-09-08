@@ -67,11 +67,14 @@ void tex_params( GLenum target, int channels, char const *options,
 }
 }
 
-Texture::Texture( int target, int width, int height, int channels )
-	: PixelBuffer( width, height ), m_target( target ), m_channels( channels )
+Texture::Texture( int target, int width, int height, int depth, int channels, char const *options )
+	: PixelBuffer( width, height ), m_depth( depth ), m_target( target ), m_channels( channels )
 {
 	glGenTextures( 1, &m_id );
-	glBindTexture( m_target, m_id );
+	glBindTexture( target, m_id );
+
+	tex_params( target, channels, options,
+                m_int_format, m_format, m_type, m_is_mipmapped );
 }
 
 Texture::~Texture()
@@ -97,20 +100,22 @@ void Texture::gen_mipmaps()
 	glGenerateMipmap( m_target );
 }
 
+void Texture::get_image_data( void *buffer, int type ) const
+{
+	if( m_channels < 1 || m_channels > 4 )
+		return;
+	glBindTexture( m_target, m_id );
+	static const GLenum formats[5] = {0, GL_RED, GL_RG, GL_RGB, GL_RGBA};
+	glGetTexImage( m_target, 0, formats[m_channels], type, buffer );
+}
+
 
 Texture2D::Texture2D( int width, int height, int channels, void *data, char const *options )
-	: Texture( GL_TEXTURE_2D, width, height, channels )
+	: Texture( GL_TEXTURE_2D, width, height, 1, channels, options )
 {
+	glTexImage2D( GL_TEXTURE_2D, 0, int_format(), width, height, 0, format(), type(), data );
 
-	GLenum type, format, int_format;
-	bool is_mipmapped;
-
-	tex_params( GL_TEXTURE_2D, channels, options,
-                int_format, format, type, is_mipmapped );
-
-	glTexImage2D( GL_TEXTURE_2D, 0, int_format, width, height, 0, format, type, data );
-
-	if( is_mipmapped )//&& data )
+	if( is_mipmapped() )//&& data )
 		glGenerateMipmap( GL_TEXTURE_2D );
 	glBindTexture( GL_TEXTURE_2D, 0 );
 
@@ -118,36 +123,22 @@ Texture2D::Texture2D( int width, int height, int channels, void *data, char cons
 
 
 Texture2DArray::Texture2DArray( int width, int height, int size, int channels, void *data, char const *options )
-	: Texture( GL_TEXTURE_2D_ARRAY, width, height, channels )
+	: Texture( GL_TEXTURE_2D_ARRAY, width, height, size, channels, options )
 {
+	glTexImage3D( GL_TEXTURE_2D_ARRAY, 0, int_format(), width, height, size, 0, format(), type(), data );
 
-	GLenum type, format, int_format;
-	bool is_mipmapped;
-
-	tex_params( GL_TEXTURE_2D_ARRAY, channels, options,
-                int_format, format, type, is_mipmapped );
-
-	glTexImage3D( GL_TEXTURE_2D_ARRAY, 0, int_format, width, height, size, 0, format, type, data );
-
-	if( is_mipmapped )//&& data )
+	if( is_mipmapped() )//&& data )
 		glGenerateMipmap( GL_TEXTURE_2D_ARRAY );
 	glBindTexture( GL_TEXTURE_2D_ARRAY, 0 );
 
 }
 
 Texture3D::Texture3D( int width, int height, int depth, int channels, void *data, char const *options )
-	: Texture( GL_TEXTURE_3D, width, height, channels )
+	: Texture( GL_TEXTURE_3D, width, height, depth, channels, options )
 {
+	glTexImage3D( GL_TEXTURE_3D, 0, int_format(), width, height, depth, 0, format(), type(), data );
 
-	GLenum type, format, int_format;
-	bool is_mipmapped;
-
-	tex_params( GL_TEXTURE_3D, channels, options,
-                int_format, format, type, is_mipmapped );
-
-	glTexImage3D( GL_TEXTURE_3D, 0, int_format, width, height, depth, 0, format, type, data );
-
-	if( is_mipmapped )//&& data )
+	if( is_mipmapped() )//&& data )
 		glGenerateMipmap( GL_TEXTURE_3D );
 	glBindTexture( GL_TEXTURE_3D, 0 );
 
@@ -158,22 +149,16 @@ TextureCube::TextureCube( int size, int channels,
                           void *pos_y, void *neg_y,
                           void *pos_z, void *neg_z,
                           char const *options )
-	: Texture( GL_TEXTURE_CUBE_MAP, size, size, channels )
+	: Texture( GL_TEXTURE_CUBE_MAP, size, size, 1, channels, options )
 {
-	GLenum type, format, int_format;
-	bool is_mipmapped;
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, int_format(), size, size, 0, format(), type(), pos_x );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, int_format(), size, size, 0, format(), type(), neg_x );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, int_format(), size, size, 0, format(), type(), pos_y );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, int_format(), size, size, 0, format(), type(), neg_y );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, int_format(), size, size, 0, format(), type(), pos_z );
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, int_format(), size, size, 0, format(), type(), neg_z );
 
-	tex_params( GL_TEXTURE_CUBE_MAP, channels, options,
-                int_format, format, type, is_mipmapped );
-
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, pos_x );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, neg_x );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, pos_y );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, neg_y );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, pos_z );
-	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, int_format, size, size, 0, format, GL_UNSIGNED_BYTE, neg_z );
-
-	if( is_mipmapped )//&& data )
+	if( is_mipmapped() )//&& data )
 		glGenerateMipmap( GL_TEXTURE_CUBE_MAP );
 
 	glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );

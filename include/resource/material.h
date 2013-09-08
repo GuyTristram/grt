@@ -13,7 +13,7 @@ public:
 	                   RenderState::Ptr const &state     = RenderState::stock_opaque() );
 
 	ShaderProgram::Ptr geom_program;
-	ShaderProgram::Ptr shade_program;
+	ShaderProgram::Ptr program;
 	RenderState::Ptr state;
 	UniformGroup uniforms;
 

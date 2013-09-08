@@ -35,6 +35,9 @@ public:
 	static void bind_texture_to_current_program( int unit, SharedPtr< Texture > texture );
 
 private:
+	void get_vertex_attribute_info();
+	void get_uniform_info();
+
 	int m_program;
 
 	struct AttributeLocation

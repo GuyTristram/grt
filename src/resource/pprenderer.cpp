@@ -28,7 +28,7 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	int w = device.width(), h = device.height();
 
 	SharedPtr< Texture2D > depthTexture( new Texture2D( w, h, 1, 0, "dfc" ) );
-	SharedPtr< Texture2D > normalTexture( new Texture2D( w, h, 3, 0, "c" ) );
+	SharedPtr< Texture2D > normalTexture( new Texture2D( w, h, 4, 0, "c" ) );
 	SharedPtr< Texture2D > lightTexture( new Texture2D( w, h, 4, 0, "cs" ) );
 	SharedPtr< Texture2D > hdrTexture( new Texture2D( w, h, 3, 0, "cs" ) );
 

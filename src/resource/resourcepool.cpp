@@ -263,6 +263,29 @@ SharedPtr< Texture2DArray > ResourcePool::texture2d_array( std::vector< std::str
 	return new_tex;
 }
 
+SharedPtr< Texture2DArray > ResourcePool::texture2d_array( std::string const &filename )
+{
+	auto tex = m_texture_arrays.find( filename );
+	if( tex != m_texture_arrays.end() )
+		return tex->second;
+
+	std::ifstream in_stream( filename.c_str(), std::ofstream::binary );
+	int count, size, channels, buffer_size;
+	char name[4];
+	in_stream.read( name, 4 );
+	in_stream.read( (char*)&count, 4 );
+	in_stream.read( (char*)&size, 4 );
+	in_stream.read( (char*)&channels, 4 );
+	in_stream.read( (char*)&buffer_size, 4 );
+	std::vector< unsigned char > data( buffer_size );
+	in_stream.read( (char*)&data[0], buffer_size );
+
+	Texture2DArray::Ptr new_tex( new Texture2DArray( size, size, count, channels, &data[0] ) );
+
+	m_texture_arrays[ filename ] = new_tex;
+	return new_tex;
+}
+
 SharedPtr< Image > ResourcePool::image( char const *filename )
 {
 	auto im = m_images.find( filename );
