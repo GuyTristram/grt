@@ -10,6 +10,8 @@ struct vec4
 	vec4() {} // No default values for x & y
 	vec4( T x, T y, T z, T w ) : x( x ), y( y ), z( z ), w( w ) {}
 	vec4( vec3<T> const &v3, T w ) : x( v3.x ), y( v3.y ), z( v3.z ), w( w ) {}
+	template< typename U >
+	explicit vec4( vec4<U> const &v ) : x( T( v.x ) ), y( T( v.y ) ), z( T( v.z ) ), w( T( v.w ) ) {}
 
 	vec3<T> xyz() const {return vec3<T>( x, y, z );}
 	vec3<T> &xyz() {return reinterpret_cast< vec3<T> &>( *this );}

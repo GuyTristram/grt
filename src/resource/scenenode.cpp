@@ -1,6 +1,7 @@
 #include "resource/scenenode.h"
 #include "resource/resourcepool.h"
 #include <algorithm>
+#include <queue>
 // assimp include files. These three are usually needed.
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -61,6 +62,10 @@ void SceneNode::parent_from_local( float44 const &m )
 	m_parent_from_local = m;
 }
 
+float44 SceneNode::parent_from_local() const
+{
+	return m_parent_from_local;
+}
 
 void SceneNode::modify_transform()
 {
@@ -118,6 +123,42 @@ void visit_scene( SceneNode &node, SceneNodeVisitor &visitor )
 }
 
 
+class NodeFinder : public SceneNodeVisitor
+{
+public:
+	NodeFinder( char const *name ) : name( name ) {}
+
+	virtual void visit( SceneNode & n ) { if(n.name == name ) node = SceneNode::Ptr( &n );}
+
+	SceneNode::Ptr node;
+	std::string name;
+};
+
+SceneNode::Ptr find_node( SceneNode &root, char const *name )
+{
+	NodeFinder finder( name );
+	visit_scene( root, finder );
+	return finder.node;
+}
+
+class BoneFixer : public SceneNodeVisitor
+{
+public:
+	BoneFixer( SceneNode & n ) : root( n ) {}
+
+	virtual void visit( SceneMesh & n )
+	{
+		for( auto &bone : n.mesh.bones )
+		{
+			NodeFinder finder( bone.node_name.c_str() );
+			visit_scene( root, finder );
+			n.bones.push_back( finder.node );
+		}
+	}
+
+	SceneNode &root;
+};
+
 class AILoader
 {
 public:
@@ -126,7 +167,14 @@ public:
 		m_scene = aiImportFile( filename, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_FlipUVs );
 		load_meshes();
 		load_materials();
-		m_root = load_node( *m_scene->mRootNode );
+		m_root.set( new SceneNode );
+		load_node( *m_scene->mRootNode )->set_parent( m_root.get() );
+		BoneFixer fixer( *m_root );
+		visit_scene( *m_root, fixer );
+	}
+	~AILoader()
+	{
+		aiReleaseImport( m_scene );
 	}
 
 	SceneNode::Ptr root() { return m_root; }
@@ -147,6 +195,8 @@ public:
 		{
 			node.set( new SceneNode );
 		}
+
+		node->name = ai_node.mName.C_Str();
 
 		aiMatrix4x4 m = ai_node.mTransformation;
 		aiTransposeMatrix4(&m);
@@ -173,6 +223,7 @@ public:
 	void load( Material &material, aiMaterial &ai_material )
 	{
 		material.program = m_pool.shader_program( "use_light_map2.sp" );
+		material.geom_program = m_pool.shader_program( "draw_normals.sp" );
 		set_texture( material, ai_material, aiTextureType_DIFFUSE, "u_texture", "white.png" );
 		set_texture( material, ai_material, aiTextureType_SPECULAR, "u_specular", "white.png" );
 		set_texture( material, ai_material, aiTextureType_NORMALS, "u_normal", "flat.png" );
@@ -187,6 +238,44 @@ public:
 			load( *m_materials.back(), *m_scene->mMaterials[i] );
 		}
 	}
+
+	struct VertexWeight
+	{
+		VertexWeight() : weight( 0.0 ), index( 0 ) {}
+		VertexWeight( float weight, unsigned int index ) : weight( weight ), index( index ) {}
+		float weight;
+		unsigned int index;
+		bool operator<( VertexWeight const &other ) const { return weight < other.weight; } 
+	};
+
+	struct VertexWeights
+	{
+		VertexWeights() : weight_vector( 0, 0, 0, 0 ), index_vector( 0, 0, 0, 0 ) {}
+		std::priority_queue< VertexWeight > weights;
+		uchar4 weight_vector;
+		uchar4 index_vector;
+		void add_weight( float weight, unsigned int index )
+		{
+			weights.push( VertexWeight( weight, index ) );
+			if( weights.size() > 4 ) weights.pop();
+		}
+		void normalize()
+		{
+			float total = 0.f;
+			int count = weights.size();
+			for( int i = 0; i != count; ++i )
+			{
+				total += weights.top().weight;
+				weight_vector[i] = weights.top().weight * 255;
+				index_vector[i] = weights.top().index;
+				weights.pop();
+			}
+
+			if( total > 0.f ) 
+				for( int i = 0; i != count; ++i )
+					weight_vector[i] /= total;
+		}
+	};
 
 	void load( Mesh &mesh, aiMesh &ai_mesh )
 	{
@@ -205,6 +294,10 @@ public:
 		VertexAttribute< float2 > uv_att;
 		VertexAttribute< float3 > norm_att;
 		VertexAttribute< float3 > tan_att;
+		VertexAttribute< uchar4 > index_att;
+		VertexAttribute< uchar4 > weight_att;
+
+		std::vector< VertexWeights > vertex_weights;
 
 		if( ai_mesh.HasPositions() )
 			pos_att = mesh.vb->add_attribute< float3 >( "a_position" );
@@ -214,6 +307,32 @@ public:
 			norm_att = mesh.vb->add_attribute< float3 >( "a_normal" );
 		if( ai_mesh.HasTangentsAndBitangents() )
 			tan_att = mesh.vb->add_attribute< float3 >( "a_tangent" );
+		if( ai_mesh.HasBones() )
+		{
+			index_att = mesh.vb->add_attribute< uchar4 >( "a_indices", false, false );
+			weight_att = mesh.vb->add_attribute< uchar4 >( "a_weights" );
+
+			vertex_weights.resize( ai_mesh.mNumVertices );
+			mesh.bones.resize( ai_mesh.mNumBones );
+
+			for( int ibone = 0; ibone != ai_mesh.mNumBones; ++ibone )
+			{
+				aiBone *bone = ai_mesh.mBones[ibone];
+				for( int iweight = 0; iweight != bone->mNumWeights; ++iweight )
+				{
+					aiVertexWeight weight = bone->mWeights[iweight];
+					vertex_weights[ weight.mVertexId ].add_weight( weight.mWeight, ibone );
+				}
+				mesh.bones[ibone].node_name = bone->mName.C_Str();
+				aiMatrix4x4 m = bone->mOffsetMatrix;
+				aiTransposeMatrix4(&m);
+				mesh.bones[ibone].bone_from_model = 
+					float44( float4( m.a1, m.a2, m.a3, m.a4 ), float4( m.b1, m.b2, m.b3, m.b4 ),
+					         float4( m.c1, m.c2, m.c3, m.c4 ), float4( m.d1, m.d2, m.d3, m.d4 ) );
+			}
+
+			for( auto &weights : vertex_weights ) weights.normalize();
+		}
 
 		int vertex_count = ai_mesh.mNumVertices;
 		mesh.vb->vertex_count( vertex_count );
@@ -249,6 +368,16 @@ public:
 			auto tan_it = tan_att.begin();
 			for( int i = 0; i < vertex_count; ++i )
 				*tan_it++ = float3( ai_mesh.mTangents[i].x, ai_mesh.mTangents[i].y, ai_mesh.mTangents[i].z );
+		}
+		if( ai_mesh.HasBones() )
+		{
+			auto index_it = index_att.begin();
+			auto weight_it = weight_att.begin();
+			for( int i = 0; i < vertex_count; ++i )
+			{
+				*index_it++ = vertex_weights[i].index_vector;
+				*weight_it++ = vertex_weights[i].weight_vector;
+			}
 		}
 
 		std::vector< unsigned short > indices;

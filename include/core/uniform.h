@@ -87,6 +87,7 @@ template< typename T >
 struct UniformType {};
 
 template<>           struct UniformType< int >                 {static int type() {return GL_INT;} };
+template<>           struct UniformType< bool >                {static int type() {return GL_BOOL;} };
 template<>           struct UniformType< float >               {static int type() {return GL_FLOAT;} };
 template<>           struct UniformType< float2 >              {static int type() {return GL_FLOAT_VEC2;} };
 template<>           struct UniformType< float3 >              {static int type() {return GL_FLOAT_VEC3;} };
@@ -117,6 +118,7 @@ inline void set( int location, float22 const &data, int tex_unit, int size ) { g
 inline void set( int location, float33 const &data, int tex_unit, int size ) { glUniformMatrix3fv( location, size, false, &data.i.x ); }
 inline void set( int location, float44 const &data, int tex_unit, int size ) { glUniformMatrix4fv( location, size, false, &data.i.x ); }
 inline void set( int location, int     const &data, int tex_unit, int size ) { glUniform1iv( location, size, &data ); }
+inline void set( int location, bool    const &data, int tex_unit, int size ) { GLint i = data ? 1 : 0; glUniform1iv( location, size, &i ); }
 
 void set( int location, Texture2D::Ptr const &data, int tex_unit, int size );
 void set( int location, Texture2DArray::Ptr const &data, int tex_unit, int size );

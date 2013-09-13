@@ -32,11 +32,12 @@ public:
 	typedef SharedPtr< SceneNode > Ptr;
 
 	SceneNode();
-	~SceneNode();
+	virtual ~SceneNode();
 
 	void set_parent( SceneNode *parent );
 
 	void parent_from_local( float44 const &m );
+	float44 parent_from_local() const;
 	float44 const &world_from_model();
 
 	virtual void accept( SceneNodeVisitor &visitor );
@@ -45,6 +46,8 @@ public:
 
 	Iterator begin();
 	Iterator end();
+
+	std::string name;
 
 protected:
 	float44 m_parent_from_local;
@@ -80,6 +83,8 @@ public:
 	AABB          aabb;      // \todo This will need to be updated as soon as we're using a heirarchy
 	float distance_from_eye2;
 
+	std::vector< SceneNode::Ptr > bones;
+
 	virtual void accept( SceneNodeVisitor &visitor );
 };
 
@@ -109,6 +114,7 @@ public:
 
 
 void visit_scene( SceneNode &node, SceneNodeVisitor &visitor );
+SceneNode::Ptr find_node( SceneNode &root, char const *name );
 
 SceneNode::Ptr load_model( char const *filename );
 

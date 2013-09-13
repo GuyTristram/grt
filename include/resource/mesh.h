@@ -13,6 +13,12 @@ struct Mesh
 	RenderTarget::PrimitiveType type;
 	IndexBuffer::Ptr  ib;
 	VertexBuffer::Ptr vb;
+	struct Bone
+	{
+		std::string node_name;
+		float44 bone_from_model;
+	};
+	std::vector< Bone > bones;
 	void draw( ShaderProgram &sp, RenderState &rs, RenderTarget &rt );
 };
 

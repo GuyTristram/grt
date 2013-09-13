@@ -28,11 +28,6 @@ public:
 	PPRenderer( Device &device, ResourcePool &pool );
 	~PPRenderer();
 
-	void render( Device &device, Mesh &mesh, Material &material,
-	             float44 const &cam_pos, float44 const &cam_pers,
-	             std::vector< float4 > const &light_positions,
-	             std::vector< float > const &light_intensities );
-
 	void render( Device &device, float44 const &cam_pos, float44 const &cam_pers,
 	             SceneNode &root );
 
@@ -42,7 +37,14 @@ public:
 private:
 	//static const int SHADOW_SIZE = 2048;
 	void update_light( SceneLight &light );
-	void draw_meshes( ShaderProgram &p, RenderState &s, RenderTarget &t, Frustum const &f, float44 const &projected_from_world );
+	enum Shader
+	{
+		DEPTH,
+		GEOMETRY,
+		MATERIAL
+	};
+	void draw_meshes( Shader shader, RenderState &s, RenderTarget &t, Frustum const &f,
+	                  float44 const &projected_from_world, UniformGroup &uniforms );
 
 	SharedPtr< ShaderProgram > m_depth_pass_program;
 	SharedPtr< ShaderProgram > m_gbuf_program;
@@ -68,6 +70,7 @@ private:
 	};
 	std::map< int, TempMaps > m_temp_maps;
 
+	UniformGroup m_dummy_uniforms;
 	UniformGroup m_shadow_uniforms;
 	UniformGroup m_light_uniforms;
 	UniformGroup m_shade_uniforms;
