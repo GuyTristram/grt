@@ -13,6 +13,7 @@ struct vec3
 	vec3<T> &operator+=( vec3<T> const &b ) {x += b.x; y += b.y; z += b.z; return *this;}
 	vec3<T> &operator-=( vec3<T> const &b ) {x -= b.x; y -= b.y; z -= b.z; return *this;}
 	vec3<T> &operator*=( vec3<T> const &b ) {x *= b.x; y *= b.y; z *= b.z; return *this;}
+	vec3<T> &operator*=( T b ) {x *= b; y *= b; z *= b; return *this;}
 	vec3<T> operator-() {return vec3<T>( -x, -y, -z );}
 
 	T &operator[]( int i ) {return *( &x + i );}
@@ -69,7 +70,7 @@ vec3<T> operator*( vec3<T> const &a, vec3<T> const &b )
 template< typename T, typename S >
 vec3<T> operator*( S a, vec3<T> const &b )
 {
-	return vec3<T>( a * b.x, a * b.y, a * b.z );
+	return vec3<T>( T(a) * b.x, T(a) * b.y, T(a) * b.z );
 }
 
 template< typename T, typename S >

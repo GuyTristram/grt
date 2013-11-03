@@ -50,6 +50,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS -_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>C:\Users\Guy\Documents\Projects\External\assimp--3.0.1270-sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -63,6 +64,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS -_CRT_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>C:\Users\Guy\Documents\Projects\External\assimp--3.0.1270-sdk\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -93,6 +95,7 @@
     <ClInclude Include="..\..\..\include\math\mat33.h" />
     <ClInclude Include="..\..\..\include\math\mat44.h" />
     <ClInclude Include="..\..\..\include\math\perlin.h" />
+    <ClInclude Include="..\..\..\include\math\quat.h" />
     <ClInclude Include="..\..\..\include\math\vec.h" />
     <ClInclude Include="..\..\..\include\math\vec2.h" />
     <ClInclude Include="..\..\..\include\math\vec3.h" />

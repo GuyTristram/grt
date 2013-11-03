@@ -203,13 +203,13 @@ void PPRenderer::draw_meshes( Shader shader, RenderState &s, RenderTarget &t, Fr
 			case GEOMETRY: p = m->material->geom_program.get(); break;
 			case MATERIAL: p = m->material->program.get();      break;
 			}
-			float44 const &model = m->world_from_model();
+			float44 const &model = m->world_from_local();
 			float33 normal_mat( model.i.xyz(), model.j.xyz(), model.k.xyz() );
 
 			p->set( uniforms );
 			p->set( "u_t_world_from_model",  model );
 			p->set( "u_t_normal", float33() );
-			p->set( "u_t_clip_from_model",  projected_from_world * m->world_from_model() );
+			p->set( "u_t_clip_from_model",  projected_from_world * m->world_from_local() );
 			p->set( "u_t_clip_from_world",  projected_from_world );
 			if( m->bones.size() )
 			{
@@ -217,7 +217,7 @@ void PPRenderer::draw_meshes( Shader shader, RenderState &s, RenderTarget &t, Fr
 				std::vector< float44 > bone_transforms( m->bones.size() );
 				for( int i = 0; i != m->bones.size(); ++i )
 				{
-					bone_transforms[i] = m->bones[i]->world_from_model() * m->mesh.bones[i].bone_from_model;
+					bone_transforms[i] = m->bones[i]->world_from_local() * m->mesh.bones[i].bone_from_model;
 				}
 				p->set( "u_t_bone_transforms[0]", bone_transforms );
 			}
@@ -287,7 +287,7 @@ void PPRenderer::update_light( SceneLight &light )
 						std::vector< float44 > bone_transforms( m->bones.size() );
 						for( int i = 0; i != m->bones.size(); ++i )
 						{
-							bone_transforms[i] = m->bones[i]->world_from_model() * m->mesh.bones[i].bone_from_model;
+							bone_transforms[i] = m->bones[i]->world_from_local() * m->mesh.bones[i].bone_from_model;
 						}
 						m_shadow_program->set( "u_t_bone_transforms[0]", bone_transforms );
 					}
@@ -295,7 +295,7 @@ void PPRenderer::update_light( SceneLight &light )
 					{
 						m_shadow_program->set( "u_skinned", false );
 					}
-					m_shadow_program->set( "u_t_clip_from_model", proj_from_world * m->world_from_model() );
+					m_shadow_program->set( "u_t_clip_from_model", proj_from_world * m->world_from_local() );
 					m->mesh.draw( *m_shadow_program, m_shadow_state, *m_near_shadow_target );
 				}
 			}
@@ -313,7 +313,7 @@ void PPRenderer::update_light( SceneLight &light )
 						std::vector< float44 > bone_transforms( m->bones.size() );
 						for( int i = 0; i != m->bones.size(); ++i )
 						{
-							bone_transforms[i] = m->bones[i]->world_from_model() * m->mesh.bones[i].bone_from_model;
+							bone_transforms[i] = m->bones[i]->world_from_local() * m->mesh.bones[i].bone_from_model;
 						}
 						m_shadow_program->set( "u_t_bone_transforms[0]", bone_transforms );
 					}
@@ -321,7 +321,7 @@ void PPRenderer::update_light( SceneLight &light )
 					{
 						m_shadow_program->set( "u_skinned", false );
 					}
-					m_shadow_program->set( "u_t_clip_from_model", proj_from_world * m->world_from_model() );
+					m_shadow_program->set( "u_t_clip_from_model", proj_from_world * m->world_from_local() );
 					m->mesh.draw( *m_shadow_program, m_shadow_state, *m_far_shadow_target );
 				}
 			}

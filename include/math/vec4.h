@@ -41,6 +41,9 @@ template< typename T, typename S >      vec4<T> operator*( S a, vec4<T> const &b
 template< typename T, typename S >      vec4<T> operator*( vec4<T> const &a, S b );
 template< typename T, typename S >      vec4<T> operator/( vec4<T> const &a, S b );
 
+template< typename T >                  bool operator==( vec4<T> const &a, vec4<T> const & b );
+template< typename T >                  bool operator!=( vec4<T> const &a, vec4<T> const & b );
+
 template< typename T >                  T length( vec4<T> const &v );
 template< typename T >                  vec4<T> unit( vec4<T> const &v );
 template< typename T >                  vec4<T> dot( vec4<T> const &a, vec4<T> const &b );
@@ -82,6 +85,18 @@ template< typename T, typename S >
 vec4<T> operator/( vec4<T> const &a, S b )
 {
 	return vec4<T>( a.x / b, a.y / b, a.z / b, a.w / b );
+}
+
+template< typename T >
+bool operator==( vec4<T> const &a, vec4<T> const & b )
+{
+	return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
+}
+
+template< typename T >
+bool operator!=( vec4<T> const &a, vec4<T> const & b )
+{
+	return !( a == b );
 }
 
 template< typename T >

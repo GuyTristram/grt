@@ -7,7 +7,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-SceneNode::SceneNode() : m_dirty( false ), m_parent( 0 ) {}
+SceneNode::SceneNode() : m_scale( 1.f, 1.f, 1.f ), m_position( 0.f, 0.f, 0.f ), m_dirty( false ), m_local_dirty( false ), m_local_set( false ), m_parent( 0 ) {}
 
 SceneNode::~SceneNode()
 {
@@ -38,17 +38,18 @@ void SceneNode::set_parent( SceneNode *parent )
 	}
 }
 
-float44 const &SceneNode::world_from_model()
+float44 const &SceneNode::world_from_local() const
 {
 	if( m_dirty )
 	{
 		if( m_parent )
-			m_world_from_model = m_parent->world_from_model();
-		modify_transform();
+			m_world_from_local = m_parent->world_from_local() * parent_from_local();
+		else
+			m_world_from_local = parent_from_local();
 		m_dirty = false;
 	}
 
-	return m_world_from_model;
+	return m_world_from_local;
 }
 
 void SceneNode::accept( SceneNodeVisitor &visitor )
@@ -58,18 +59,78 @@ void SceneNode::accept( SceneNodeVisitor &visitor )
 
 void SceneNode::parent_from_local( float44 const &m )
 {
-	m_dirty = true;
+	set_dirty();
+	m_local_dirty = false;
+	m_local_set = true;
 	m_parent_from_local = m;
 }
 
-float44 SceneNode::parent_from_local() const
+float44 const &SceneNode::parent_from_local() const
 {
+	if( m_local_dirty )
+	{
+		float44 r;
+		to_matrix( m_rotation, r );
+		//m_parent_from_local = r * ::scale( float4( m_scale, 1.0f ) );
+		for( int i = 0; i != 3; ++i )
+			m_parent_from_local[i].xyz() *= m_scale[i];
+		m_parent_from_local = r * ::scale( float4( m_scale, 1.0f ) );
+		m_parent_from_local.t.xyz() = m_position;
+		m_local_dirty = false;
+	}
 	return m_parent_from_local;
 }
 
-void SceneNode::modify_transform()
+
+void SceneNode::rotation( floatq const &q )
 {
-	m_world_from_model = m_world_from_model * m_parent_from_local;
+	decompose();
+	if( q != m_rotation )
+	{
+		set_dirty();
+		m_local_dirty = true;
+		m_rotation = q;
+	}
+}
+
+floatq const &SceneNode::rotation() const
+{
+	decompose();
+	return m_rotation;
+}
+
+void SceneNode::scale( float3 const &s )
+{
+	decompose();
+	if( s != m_scale )
+	{
+		set_dirty();
+		m_local_dirty = true;
+		m_scale = s;
+	}
+}
+
+float3 const &SceneNode::scale() const
+{
+	decompose();
+	return m_scale;
+}
+
+void SceneNode::position( float3 const &p )
+{
+	decompose();
+	if( p != m_position )
+	{
+		set_dirty();
+		m_local_dirty = true;
+		m_position = p;
+	}
+}
+
+float3 const &SceneNode::position() const
+{
+	decompose();
+	return m_position;
 }
 
 SceneNode::Iterator SceneNode::begin()
@@ -94,16 +155,18 @@ void SceneNode::set_dirty()
 		( *i )->set_dirty();
 }
 
-void SceneNodePosition::set( float4 const &position )
+void SceneNode::decompose() const
 {
-	m_position = position;
-	set_dirty();
+	if( m_local_set )
+	{
+		m_position = m_parent_from_local.t.xyz();
+		m_scale = float3( length( m_parent_from_local.i ), length( m_parent_from_local.j ), length( m_parent_from_local.k ) );
+		float33 rot( m_parent_from_local.i.xyz() / m_scale.x, m_parent_from_local.j.xyz() / m_scale.y, m_parent_from_local.k.xyz() / m_scale.z );
+		from_matrix( m_rotation, rot );
+		m_local_set = false;
+	}
 }
 
-void SceneNodePosition::modify_transform()
-{
-	m_world_from_model.t = m_world_from_model * m_position;
-}
 
 void SceneMesh::accept( SceneNodeVisitor &visitor )
 {
@@ -149,11 +212,7 @@ public:
 	virtual void visit( SceneMesh & n )
 	{
 		for( auto &bone : n.mesh.bones )
-		{
-			NodeFinder finder( bone.node_name.c_str() );
-			visit_scene( root, finder );
-			n.bones.push_back( finder.node );
-		}
+			n.bones.push_back( find_node( root, bone.node_name.c_str() ) );
 	}
 
 	SceneNode &root;
@@ -171,6 +230,7 @@ public:
 		load_node( *m_scene->mRootNode )->set_parent( m_root.get() );
 		BoneFixer fixer( *m_root );
 		visit_scene( *m_root, fixer );
+		load_animations();
 	}
 	~AILoader()
 	{
@@ -178,6 +238,88 @@ public:
 	}
 
 	SceneNode::Ptr root() { return m_root; }
+	Animation::Ptr animation() { return m_animation; }
+
+	class AnimatePosition : public Animation
+	{
+	public:
+		AnimatePosition( SceneNode::Ptr const &node, KeyData< float3 >::Ptr const &data )
+			: m_node( node ), m_data( data ) {}
+		virtual void update( double time ) { if( m_node ) m_node->position( m_data->get( time ) ); }
+	private:
+		SceneNode::Ptr m_node;
+		KeyData< float3 >::Ptr m_data;
+	};
+
+	class AnimateScale : public Animation
+	{
+	public:
+		AnimateScale( SceneNode::Ptr const &node, KeyData< float3 >::Ptr const &data )
+			: m_node( node ), m_data( data ) {}
+		virtual void update( double time ) { if( m_node ) m_node->scale( m_data->get( time ) ); }
+	private:
+		SceneNode::Ptr m_node;
+		KeyData< float3 >::Ptr m_data;
+	};
+
+	class AnimateRotation : public Animation
+	{
+	public:
+		AnimateRotation( SceneNode::Ptr const &node, KeyData< floatq >::Ptr const &data )
+			: m_node( node ), m_data( data ) {}
+		virtual void update( double time ) { if( m_node ) m_node->rotation( m_data->get( time ) ); }
+	private:
+		SceneNode::Ptr m_node;
+		KeyData< floatq >::Ptr m_data;
+	};
+
+	void load_animations()
+	{
+		m_animation.set( new AnimationGroup );
+		for( int i = 0; i != m_scene->mNumAnimations; ++i )
+		{
+			aiAnimation *anim = m_scene->mAnimations[i];
+			double time_mult = anim->mTicksPerSecond ? 1.0 / anim->mTicksPerSecond : 1.0;
+			for( int j = 0; j != anim->mNumChannels; ++j )
+			{
+				aiNodeAnim *node_anim = anim->mChannels[j];
+				SceneNode::Ptr node = find_node( *m_root, node_anim->mNodeName.C_Str() );
+				if( node_anim->mNumPositionKeys )
+				{
+					KeyData< float3 >::Ptr data( new KeyData< float3 >() );
+					data->reserve( node_anim->mNumPositionKeys );
+					for( unsigned int i = 0; i < node_anim->mNumPositionKeys; ++i )
+					{
+						aiVector3D v = node_anim->mPositionKeys[i].mValue;
+						data->push_back( node_anim->mPositionKeys[i].mTime * time_mult, float3( v.x, v.y, v.z ) );
+					}
+					m_animation->add( Animation::Ptr( new AnimatePosition( node, data) ) );
+				}
+				if( node_anim->mNumRotationKeys )
+				{
+					KeyData< floatq >::Ptr data( new KeyData< floatq >() );
+					data->reserve( node_anim->mNumRotationKeys );
+					for( unsigned int i = 0; i < node_anim->mNumRotationKeys; ++i )
+					{
+						aiQuaternion q = node_anim->mRotationKeys[i].mValue;
+						data->push_back( node_anim->mRotationKeys[i].mTime * time_mult, floatq( q.x, q.y, q.z, q.w ) );
+					}
+					m_animation->add( Animation::Ptr( new AnimateRotation( node, data) ) );
+				}
+				if( node_anim->mNumScalingKeys )
+				{
+					KeyData< float3 >::Ptr data( new KeyData< float3 >() );
+					data->reserve( node_anim->mNumScalingKeys );
+					for( unsigned int i = 0; i < node_anim->mNumScalingKeys; ++i )
+					{
+						aiVector3D v = node_anim->mScalingKeys[i].mValue;
+						data->push_back( node_anim->mScalingKeys[i].mTime * time_mult, float3( v.x, v.y, v.z ) );
+					}
+					m_animation->add( Animation::Ptr( new AnimateScale( node, data) ) );
+				}
+			}
+		}
+	}
 
 	SceneNode::Ptr load_node( aiNode &ai_node )
 	{
@@ -199,9 +341,15 @@ public:
 		node->name = ai_node.mName.C_Str();
 
 		aiMatrix4x4 m = ai_node.mTransformation;
+		aiVector3D scaling, position;
+		aiQuaternion rotation;
+		m.Decompose( scaling, rotation, position );
 		aiTransposeMatrix4(&m);
-		node->parent_from_local( float44( float4( m.a1, m.a2, m.a3, m.a4 ), float4( m.b1, m.b2, m.b3, m.b4 ),
-		                                  float4( m.c1, m.c2, m.c3, m.c4 ), float4( m.d1, m.d2, m.d3, m.d4 ) ) );
+		//node->parent_from_local( float44( float4( m.a1, m.a2, m.a3, m.a4 ), float4( m.b1, m.b2, m.b3, m.b4 ),
+		//                                  float4( m.c1, m.c2, m.c3, m.c4 ), float4( m.d1, m.d2, m.d3, m.d4 ) ) );
+		node->position( float3( position.x, position.y, position.z ) );
+		node->scale( float3( scaling.x, scaling.y, scaling.z ) );
+		node->rotation( floatq( rotation.x, rotation.y, rotation.z, rotation.w ) );
 		for( unsigned int i = 0; i < ai_node.mNumChildren; ++i )
 			load_node( *ai_node.mChildren[i] )->set_parent( node.get() );
 
@@ -266,7 +414,7 @@ public:
 			for( int i = 0; i != count; ++i )
 			{
 				total += weights.top().weight;
-				weight_vector[i] = weights.top().weight * 255;
+				weight_vector[i] = unsigned char( weights.top().weight * 255 );
 				index_vector[i] = weights.top().index;
 				weights.pop();
 			}
@@ -404,6 +552,7 @@ private:
 	const struct aiScene* m_scene;
 	ResourcePool m_pool;
 	SceneNode::Ptr m_root;
+	AnimationGroup::Ptr m_animation;
 };
 
 /*
@@ -414,9 +563,13 @@ SceneNode::Ptr load_node( aiNode *node )
 }
 */
 
-SceneNode::Ptr load_model( char const *filename )
+Model load_model( char const *filename )
 {
 	AILoader loader( filename );
 
-	return loader.root();
+	Model model;
+	model.scene_node = loader.root();
+	model.animation = loader.animation();
+
+	return model;
 }

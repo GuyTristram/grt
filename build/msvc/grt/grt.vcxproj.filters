@@ -168,6 +168,9 @@
     <ClInclude Include="..\..\..\include\math\frustum.h">
       <Filter>Header Files\math</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\math\quat.h">
+      <Filter>Header Files\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\common\charrange.cpp">

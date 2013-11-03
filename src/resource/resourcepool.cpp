@@ -24,6 +24,18 @@
 
 namespace
 {
+unsigned int next_higher_power_of_two( unsigned int v ) // compute the next highest power of 2 of 32-bit v
+{
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v++;
+	return v;
+}
+
 
 Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 {
@@ -38,6 +50,8 @@ Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 	Material::Ptr font_material( new Material );
 
 	font_material->state = RenderState::Ptr( new RenderState( RenderState::Blend ) );
+	font_material->state->depth_write( false );
+	font_material->state->depth_test( false );
 	font_material->program = pool.shader_program( "ui.sp" );
 	font_material->uniforms.set( "u_texture", texture );
 
@@ -82,8 +96,8 @@ Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 
 Font::Ptr load_ttf( CharRange range, int size, ResourcePool &pool )
 {
-	const int first = 32, last = 255;
-	int x_size = 256, y_size = 128;
+	const int first = 32, last = 256;
+	int x_size = 1024, y_size = 4096;
 	std::vector< unsigned char > bitmap( x_size * y_size );
 	stbtt_bakedchar chardata[last-first];
 	stbtt_BakeFontBitmap( ( unsigned char * )range.begin, 0, // font location (use offset=0 for plain .ttf)
@@ -93,6 +107,7 @@ Font::Ptr load_ttf( CharRange range, int size, ResourcePool &pool )
 
 	Font::CharInfo char_info[last-first];
 
+	y_size = next_higher_power_of_two( chardata[last-first-1].y1 );
 	for( int i = 0; i < last-first; ++i )
 	{
 		char_info[i].ul = float2( chardata[i].x0 / float( x_size ),
@@ -109,18 +124,6 @@ Font::Ptr load_ttf( CharRange range, int size, ResourcePool &pool )
 	font_material->program = pool.shader_program( "uifont.sp" );
 	font_material->uniforms.set( "u_texture", Texture2D::Ptr( new Texture2D( x_size, y_size, 1, &bitmap[0] ) ) );
 	return Font::Ptr( new Font( font_material, ( float )size, x_size, y_size, 32, last-first, char_info ) );
-}
-
-unsigned int next_higher_power_of_two( unsigned int v ) // compute the next highest power of 2 of 32-bit v
-{
-	v--;
-	v |= v >> 1;
-	v |= v >> 2;
-	v |= v >> 4;
-	v |= v >> 8;
-	v |= v >> 16;
-	v++;
-	return v;
 }
 
 #ifdef GRT_USE_FREETYPE
