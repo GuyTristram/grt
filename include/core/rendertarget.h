@@ -20,14 +20,17 @@ public:
 	    Fan,
 	    Strip,
 	    Points,
-	    Lines
+	    Lines,
+		Patches
 	};
 
 	void clear_colour( float4 const &c );
 	void clear( bool colour = true, bool depth = true, bool stencil = true );
 
-	void draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, IndexBuffer &ib );
-	void draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb );
+	void draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, IndexBuffer &ib, int patch_vertices );
+	void draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, int patch_vertices );
+
+	//void clip( int2 )
 
 	virtual int width() const = 0;
 	virtual int height() const = 0;

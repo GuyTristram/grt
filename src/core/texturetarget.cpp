@@ -142,11 +142,20 @@ void TextureTarget::attach( SharedPtr<Texture2D> const &texture, BufferType type
 
 void TextureTarget::attach( SharedPtr<Texture2DArray> const &texture, int ind, BufferType type, int position )
 {
-	bind();
-	GLuint id = texture.get() ? texture->m_id : 0;
+	bind( );
+	GLuint id = texture.get( ) ? texture->m_id : 0;
 	glFramebufferTextureLayer( GL_FRAMEBUFFER, attachment( type, position ), id, 0, ind );
-	m_buffer[ index( type, position ) ] = texture;
-	unbind();
+	m_buffer[index( type, position )] = texture;
+	unbind( );
+}
+
+void TextureTarget::attach( SharedPtr<Texture2DArray> const &texture, BufferType type, int position )
+{
+	bind( );
+	GLuint id = texture.get( ) ? texture->m_id : 0;
+	glFramebufferTexture( GL_FRAMEBUFFER, attachment( type, position ), id, 0 );
+	m_buffer[index( type, position )] = texture;
+	unbind( );
 }
 
 void TextureTarget::attach( SharedPtr<TextureCube> const &texture, int face, BufferType type, int position )

@@ -19,24 +19,41 @@ Font::~Font()
 {
 }
 
-Font::CharInfo const &Font::char_info( int c )
+Font::CharInfo const *Font::char_info( int c ) const
 {
-	c -= m_first_char;
-	if( c >= int( m_char_infos.size() ) )
-		c = m_char_infos.size() - 1;
-	return m_char_infos[c];
+	int g = glyph_index( c );
+	return g == -1 ? 0 : &m_char_infos[g];
 }
+
+int Font::glyph_index( int c ) const
+{
+	if( c >= m_first_char && c - m_first_char < m_char_infos.size() )
+		return c - m_first_char;
+	return -1;
+}
+
 
 float2 Font::measure( char const *text, int len ) const
 {
 	float2 result( 0, 0 );
 	while( *text && len-- )
 	{
-		CharInfo const &info = m_char_infos[( unsigned char )*text++ - m_first_char ];
-		result.x += info.advance;
-		float h = ( info.br.y - info.ul.y );
-		if( h > result.y )
-			result.y = h;
+		int c = ( unsigned char )*text++;
+		int glyph = glyph_index( c );
+		if( glyph != -1 )
+		{
+			CharInfo const &info = m_char_infos[glyph];
+			result.x += info.advance;
+			float h = ( info.br.y - info.ul.y );
+			if( h > result.y )
+				result.y = h;
+		}
+		else if( c == '\t' )
+		{
+			int glyph = glyph_index( ' ' );
+			if( glyph != -1 )
+				result.x += m_char_infos[glyph].advance;
+		}
 	}
 	result.x;
 	result.y *= m_image_height;

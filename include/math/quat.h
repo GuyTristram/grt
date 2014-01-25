@@ -166,7 +166,8 @@ quat<T> inverse( quat<T> const & q )
 template< typename T >
 quat<T> rotateq( vec3<T> const &axis, T angle )
 {
-	return quat<T>( sin( angle * T(0.5) ) * unit( axis ), cos( angle * T(0.5) ) );
+	vec3<T> v = sin( angle * T( 0.5 ) ) * unit( axis );
+	return quat<T>( v.x, v.y, v.z, cos( angle * T(0.5) ) );
 }
 
 

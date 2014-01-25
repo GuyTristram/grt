@@ -56,7 +56,7 @@ PPRenderer::PPRenderer( Device &device, ResourcePool &pool ) :
 	m_hdr_uniforms.set( "u_depth_texture", depthTexture );
 
 	m_depth_pass_program       = pool.shader_program( "depth_pass.sp" );
-	m_gbuf_program             = pool.shader_program( "draw_normals_ar.sp" );
+	//m_gbuf_program             = pool.shader_program( "draw_normals_ar.sp" );
 	m_light_program            = pool.shader_program( "draw_lights.sp" );
 	m_light_sh_program         = pool.shader_program( "draw_lights_sh.sp" );
 	m_shade_program            = pool.shader_program( "use_light_map_ar.sp" );
@@ -199,7 +199,7 @@ void PPRenderer::draw_meshes( Shader shader, RenderState &s, RenderTarget &t, Fr
 			ShaderProgram *p;
 			switch( shader )
 			{
-			case DEPTH:   p = m_depth_pass_program.get();       break;
+			case DEPTH:   p = m->material->depth_program ? m->material->depth_program.get( ) : m_depth_pass_program.get( );       break;
 			case GEOMETRY: p = m->material->geom_program.get(); break;
 			case MATERIAL: p = m->material->program.get();      break;
 			}
@@ -208,8 +208,9 @@ void PPRenderer::draw_meshes( Shader shader, RenderState &s, RenderTarget &t, Fr
 
 			p->set( uniforms );
 			p->set( "u_t_world_from_model",  model );
-			p->set( "u_t_normal", float33() );
-			p->set( "u_t_clip_from_model",  projected_from_world * m->world_from_local() );
+			auto &wfl = m->world_from_local( );
+			p->set( "u_t_normal", float33( wfl.i.xyz( ), wfl.j.xyz( ), wfl.k.xyz( ) ) );
+			p->set( "u_t_clip_from_model", projected_from_world * wfl );
 			p->set( "u_t_clip_from_world",  projected_from_world );
 			if( m->bones.size() )
 			{

@@ -35,8 +35,8 @@ bool WGLExtensionSupported(const char *extension_name)
 
 Device::Device() : m_impl( new DeviceImpl )
 {
-	m_impl->width = 1200;
-	m_impl->height = 900;
+	m_impl->width = 1920;
+	m_impl->height = 1200;
 	WNDCLASS wc;
 	// register window class
 	wc.style = CS_OWNDC;

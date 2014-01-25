@@ -30,6 +30,9 @@ public:
 	SharedPtr< Font > font( char const *filename, int size );
 	SharedPtr< Image > image( char const *filename );
 
+	void reload_shader_program( char const *filename );
+
+
 	static ResourcePool &stock();
 
 private:

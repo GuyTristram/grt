@@ -44,6 +44,7 @@ public:
 
 	void attach( SharedPtr<Texture2D> const &texture, BufferType type = Colour, int position = 0 );
 	void attach( SharedPtr<Texture2DArray> const &texture, int index, BufferType type = Colour, int position = 0 );
+	void attach( SharedPtr<Texture2DArray> const &texture, BufferType type, int position );
 	void attach( SharedPtr<TextureCube> const &texture, int face, BufferType type = Colour, int position = 0 );
 	void attach( SharedPtr<RenderBuffer> const &buffer, BufferType type, int position = 0 );
 

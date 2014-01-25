@@ -359,6 +359,46 @@ namespace
 	{
 		return to_std_string( read_to_token( range, "#endshader" ) );
 	}
+
+	ShaderProgram::Ptr load_program( CharRange range )
+	{
+		std::string vertex_source, fragment_source, geometry_source, control_source, evaluation_source;
+
+		while( !range.empty() )
+		{
+			CharRange token = read_token( range );
+			if( token == "vertex_source" )
+				vertex_source += read_source( range );
+			else if( token == "vertex_file" )
+				vertex_source += read_source_file( range );
+			else if( token == "fragment_source" )
+				fragment_source += read_source( range );
+			else if( token == "fragment_file" )
+				fragment_source += read_source_file( range );
+			else if( token == "geometry_source" )
+				geometry_source += read_source( range );
+			else if( token == "geometry_file" )
+				geometry_source += read_source_file( range );
+			else if( token == "control_source" )
+				control_source += read_source( range );
+			else if( token == "control_file" )
+				control_source += read_source_file( range );
+			else if( token == "evaluation_source" )
+				evaluation_source += read_source( range );
+			else if( token == "evaluation_file" )
+				evaluation_source += read_source_file( range );
+		}
+
+		if( vertex_source.empty() || fragment_source.empty() )
+			return ShaderProgram::Ptr();
+
+		return make_shared< ShaderProgram >(
+			vertex_source.c_str(),
+			fragment_source.c_str(),
+			geometry_source.empty() ? 0 : geometry_source.c_str(),
+			control_source.empty() ? 0 : control_source.c_str(),
+			evaluation_source.empty() ? 0 : evaluation_source.c_str() );
+	}
 }
 
 SharedPtr< ShaderProgram > ResourcePool::shader_program( char const *filename )
@@ -369,46 +409,26 @@ SharedPtr< ShaderProgram > ResourcePool::shader_program( char const *filename )
 
 	CharRangeFile file( full_name( filename ).c_str() );
 	CharRange range = file.range();
-	//CharRange vertex_source, fragment_source;
-	std::string vertex_source, fragment_source, geometry_source, control_source, evaluation_source;
 
-	while( !range.empty() )
-	{
-		CharRange token = read_token( range );
-		if( token == "vertex_source" )
-			vertex_source += read_source( range );
-		else if( token == "vertex_file" )
-			vertex_source += read_source_file( range );
-		else if( token == "fragment_source" )
-			fragment_source += read_source( range );
-		else if( token == "fragment_file" )
-			fragment_source += read_source_file( range );
-		else if( token == "geometry_source" )
-			geometry_source += read_source( range );
-		else if( token == "geometry_file" )
-			geometry_source += read_source_file( range );
-		else if( token == "control_source" )
-			control_source += read_source( range );
-		else if( token == "control_file" )
-			control_source += read_source_file( range );
-		else if( token == "evaluation_source" )
-			evaluation_source += read_source( range );
-		else if( token == "evaluation_file" )
-			evaluation_source += read_source_file( range );
-	}
+	auto shader_program = load_program( range );
+	m_shader_programs[filename] = shader_program;
+	return shader_program;
+}
 
-	if( vertex_source.empty() || fragment_source.empty() )
-		return ShaderProgram::Ptr();
+void ResourcePool::reload_shader_program( char const *filename )
+{
+	auto stored = m_shader_programs.find( filename );
+	if( stored == m_shader_programs.end() )
+		return;
 
-	ShaderProgram::Ptr new_sp(
-		new ShaderProgram( vertex_source.c_str(),
-		                   fragment_source.c_str(),
-		                   geometry_source.empty() ? 0 : geometry_source.c_str(),
-		                   control_source.empty() ? 0 : control_source.c_str(),
-		                   evaluation_source.empty() ? 0 : evaluation_source.c_str() ) );
+	CharRangeFile file( full_name( filename ).c_str( ) );
+	CharRange range = file.range( );
 
-	m_shader_programs[ filename ] = new_sp;
-	return new_sp;
+	auto shader_program = load_program( range );
+
+	if( shader_program )
+		stored->second->swap( *shader_program );
+	return;
 }
 
 SharedPtr< Font > ResourcePool::font( char const *filename, int size )

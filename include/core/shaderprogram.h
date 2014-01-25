@@ -12,6 +12,7 @@ class ShaderProgram : public Shared
 {
 public:
 	typedef SharedPtr< ShaderProgram > Ptr;
+	ShaderProgram();
 	ShaderProgram( char const *vertex_source,
 	               char const *fragment_source,
 	               char const *geometry_source = 0,
@@ -33,6 +34,8 @@ public:
 
 	// Only for use by Uniform class
 	static void bind_texture_to_current_program( int unit, SharedPtr< Texture > texture );
+
+	void swap( ShaderProgram &other );
 
 private:
 	void get_vertex_attribute_info();

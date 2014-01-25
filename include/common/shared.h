@@ -87,6 +87,10 @@ private:
 	int m_count;
 };
 
-
+template<class T, class... Types>
+SharedPtr<T> make_shared( Types&&... args )
+{
+	return SharedPtr<T>( new T( std::forward< Types >( args )... ) );
+}
 
 #endif // SHARED_H

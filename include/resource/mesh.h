@@ -11,6 +11,7 @@ class RenderState;
 struct Mesh
 {
 	RenderTarget::PrimitiveType type;
+	int patch_vertices;
 	IndexBuffer::Ptr  ib;
 	VertexBuffer::Ptr vb;
 	struct Bone

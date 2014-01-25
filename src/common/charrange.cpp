@@ -18,7 +18,8 @@ CharRangeFile::CharRangeFile( char const *filename )
 	is.seekg( 0, ios::beg );
 
 	// allocate memory:
-	char *buffer = new char[ unsigned int( length ) ];
+	char *buffer = new char[ unsigned int( length + 1 ) ];
+	buffer[length] = 0;
 
 	// read data as a block:
 	is.read( buffer, length );

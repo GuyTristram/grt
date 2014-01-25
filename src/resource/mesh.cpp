@@ -3,9 +3,9 @@
 void Mesh::draw( ShaderProgram &sp, RenderState &rs, RenderTarget &rt )
 {
 	if( ib.get() )
-		rt.draw( sp, rs, type, *vb, *ib );
+		rt.draw( sp, rs, type, *vb, *ib, patch_vertices );
 	else if( vb.get() )
-		rt.draw( sp, rs, type, *vb );
+		rt.draw( sp, rs, type, *vb, patch_vertices );
 }
 
 Mesh make_cube()

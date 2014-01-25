@@ -45,6 +45,8 @@ bool is_texture_type( int type )
 ShaderProgram *g_last_shader = 0;
 }
 
+ShaderProgram::ShaderProgram() : m_program( 0 ) {}
+
 ShaderProgram::ShaderProgram( char const *vertex_source,
                               char const *fragment_source,
                               char const *geometry_source,
@@ -170,6 +172,14 @@ void ShaderProgram::bind_texture_to_current_program( int unit, SharedPtr< Textur
 	{
 		g_last_shader->m_bound_textures[unit] = texture;
 	}
+}
+
+void ShaderProgram::swap( ShaderProgram &other )
+{
+	std::swap( other.m_program, m_program );
+	std::swap( other.m_att_locations, m_att_locations );
+	std::swap( other.m_uniform_locations, m_uniform_locations );
+	std::swap( other.m_bound_textures, m_bound_textures );
 }
 
 ShaderProgram::Ptr const &ShaderProgram::stock_unlit()

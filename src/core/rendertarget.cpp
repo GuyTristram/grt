@@ -22,6 +22,8 @@ GLenum gl_primitive( RenderTarget::PrimitiveType type )
 		return GL_POINTS;
 	case RenderTarget::Lines:
 		return GL_LINES;
+	case RenderTarget::Patches:
+		return GL_PATCHES;
 	}
 	return GL_TRIANGLES;
 }
@@ -35,26 +37,30 @@ RenderTarget::~RenderTarget()
 		g_current_rendertarget = 0;
 }
 
-void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, IndexBuffer &ib )
+void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, IndexBuffer &ib, int patch_vertices )
 {
 	bind();
 	sp.bind();
 	rs.bind();
 	vb.bind();
 	sp.bind_textures();
+	if( type == Patches )
+		glPatchParameteri( GL_PATCH_VERTICES, patch_vertices );
 	glDrawElements( gl_primitive( type ), ib.count(), GL_UNSIGNED_SHORT, ib.indices() );
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER , 0 );
 	vb.unbind();
 }
 
-void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb )
+void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, int patch_vertices )
 {
 	bind();
 	sp.bind();
 	rs.bind();
 	vb.bind();
 	sp.bind_textures();
-	glDrawArrays( gl_primitive( type ), 0, vb.vertex_count() );
+	if( type == Patches )
+		glPatchParameteri( GL_PATCH_VERTICES, patch_vertices );
+	glDrawArrays( gl_primitive( type ), 0, vb.vertex_count( ) );
 	vb.unbind();
 }
 

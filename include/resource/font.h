@@ -25,11 +25,12 @@ public:
 	float image_width() const { return m_image_width; }
 	float image_height() const { return m_image_height; }
 	float height() const { return m_height; }
-	CharInfo const &char_info( int c );
+	CharInfo const *char_info( int c ) const;
 
 	float2 measure( char const *text, int len = -1 ) const;
 
 private:
+	int glyph_index( int c ) const;
 	SharedPtr< Material > m_material;
 	float m_height;
 	float m_image_width;

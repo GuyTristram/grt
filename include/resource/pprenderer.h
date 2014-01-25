@@ -47,7 +47,7 @@ private:
 	                  float44 const &projected_from_world, UniformGroup &uniforms );
 
 	SharedPtr< ShaderProgram > m_depth_pass_program;
-	SharedPtr< ShaderProgram > m_gbuf_program;
+	//SharedPtr< ShaderProgram > m_gbuf_program;
 	SharedPtr< ShaderProgram > m_light_program;
 	SharedPtr< ShaderProgram > m_light_sh_program;
 	SharedPtr< ShaderProgram > m_shade_program;
