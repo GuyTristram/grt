@@ -10,7 +10,7 @@ namespace grt
 template<class T>
 struct value_pack_max { static const size_t value = static_cast<size_t>(T::Count) - 1; };
 
-namespace value_pack_detail
+namespace vp_helpers
 {
     template<size_t I> struct bits    { static const size_t value = bits<I / 2>::value + 1; };
     template<>         struct bits<0> { static const size_t value = 0; };
@@ -91,13 +91,13 @@ public:
 private:
     T m_packed = T();
 
-    template<size_t I> static size_t shift() { return value_pack_detail::shift< I, Args...>::value; }
+    template<size_t I> static size_t shift() { return vp_helpers::shift<I, Args...>::value; }
     template<size_t I> static T mask()
     {
-        return value_pack_detail::mask<T, value_pack_detail::bits<value_pack_max<type_at<I>>::value>::value>::value;
+        return vp_helpers::mask<T, vp_helpers::bits<value_pack_max<type_at<I>>::value>::value>::value;
     }
 
-    static const size_t total_size = value_pack_detail::shift<sizeof...(Args), Args...>::value;
+    static const size_t total_size = vp_helpers::shift<sizeof...(Args), Args...>::value;
     static_assert(total_size <= std::numeric_limits<T>::digits, "Pack type is too small");
 };
 
@@ -112,7 +112,7 @@ template<size_t Max> struct value_pack_max<packed_int<Max>> { static const size_
 template<> struct value_pack_max<bool> { static const size_t value = 1; };
 }
 
-#define VALUE_PACK_ENUM_MAX( t, m ) template<> struct grt::value_pack_max < t > { static const size_t value = static_cast<size_t>( t::m ); };
+#define VALUE_PACK_ENUM_MAX(Enum, Max) template<> struct grt::value_pack_max<Enum> { static const size_t value = static_cast<size_t>(Enum::Max); };
 
 void test_value_pack();
 
