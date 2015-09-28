@@ -3,167 +3,149 @@
 
 namespace
 {
-	RenderState *g_current_renderstate = 0;
+	RenderState g_current_renderstate;
 }
 
-RenderState::RenderState( BlendMode blend_mode )
-	: m_blend_mode( blend_mode ),
-	  m_depth_compare( LEqual ),
-	  m_draw_front( true ),
-	  m_draw_back( false ),
-	  m_depth_write( true ),
-	  m_depth_test( true ),
-	  m_colour_write( true )
+RenderState::RenderState( BlendMode blend_mode_in )
 {
-}
-
-RenderState::~RenderState()
-{
-	unbind();
+    blend_mode( blend_mode_in );
+    depth_compare( Compare::LEqual );
+    draw_front( true );
+    draw_back( false );
+    depth_write( true );
+    depth_test( true );
+    colour_write( true );
 }
 
 void RenderState::bind()
 {
-	if( g_current_renderstate == this )
+    static bool first = true;
+	if( g_current_renderstate.m_pack == m_pack && !first )
 		return;
 
-	if( m_blend_mode == Opaque )
-		glDisable( GL_BLEND );
-	else
-		glEnable( GL_BLEND );
+    if( first || differ<Property::BlendMode >( g_current_renderstate ) )
+    {
+        if( get<Property::BlendMode>() == BlendMode::Opaque )
+            glDisable( GL_BLEND );
+        else
+            glEnable( GL_BLEND );
 
-	switch( m_blend_mode )
-	{
-	case Transparent:
-		glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-		break;
-	case Blend:
-		glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE );
-		//glBlendFunc( GL_SRC_ALPHA_SATURATE, GL_ONE_MINUS_SRC_ALPHA );
-		break;
-	case Add:
-		glBlendFunc( GL_ONE, GL_ONE );
-		break;
-	}
+        switch( get<Property::BlendMode>() )
+	    {
+        case BlendMode::Transparent:
+		    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+		    break;
+        case BlendMode::Blend:
+		    glBlendFuncSeparate( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE );
+		    //glBlendFunc( GL_SRC_ALPHA_SATURATE, GL_ONE_MINUS_SRC_ALPHA );
+		    break;
+        case BlendMode::Add:
+		    glBlendFunc( GL_ONE, GL_ONE );
+		    break;
+	    }
+    }
 
-	glColorMask( m_colour_write, m_colour_write, m_colour_write, m_colour_write );
+    if( first || differ<Property::ColourWrite >( g_current_renderstate ) )
+    {
+        bool b = get<Property::ColourWrite>();
+        glColorMask( b, b, b, b );
+    }
 
-	if( m_depth_write )
-		glDepthMask( GL_TRUE );
-	else
-		glDepthMask( GL_FALSE );
+    if( first || differ<Property::DepthWrite >( g_current_renderstate ) )
+    {
+        if( get<Property::DepthWrite>() )
+            glDepthMask( GL_TRUE );
+        else
+            glDepthMask( GL_FALSE );
+    }
 
-	if( m_depth_test )
-	{
-		glEnable( GL_DEPTH_TEST );
-		GLenum f;
-		switch( m_depth_compare )
-		{
-		case Never:    f = GL_NEVER; break;
-		case Less:     f = GL_LESS; break;
-		case Equal:    f = GL_EQUAL; break;
-		case LEqual:   f = GL_LEQUAL; break;
-		case Greater:  f = GL_GREATER; break;
-		case NotEqual: f = GL_NOTEQUAL; break;
-		case GEqual:   f = GL_GEQUAL; break;
-		case Always:   f = GL_ALWAYS; break;
-		}
-		glDepthFunc( f );
-	}
-	else
-		glDisable( GL_DEPTH_TEST );
+    if( first || differ<Property::DepthTest >( g_current_renderstate )
+        || differ<Property::DepthCompare >( g_current_renderstate ) )
+    {
+        if( get<Property::DepthTest>() )
+        {
+            glEnable( GL_DEPTH_TEST );
+            GLenum f;
+            switch( get<Property::DepthCompare>() )
+            {
+            case Compare::Never:    f = GL_NEVER; break;
+            case Compare::Less:     f = GL_LESS; break;
+            case Compare::Equal:    f = GL_EQUAL; break;
+            case Compare::LEqual:   f = GL_LEQUAL; break;
+            case Compare::Greater:  f = GL_GREATER; break;
+            case Compare::NotEqual: f = GL_NOTEQUAL; break;
+            case Compare::GEqual:   f = GL_GEQUAL; break;
+            case Compare::Always:   f = GL_ALWAYS; break;
+            }
+            glDepthFunc( f );
+        }
+        else
+            glDisable( GL_DEPTH_TEST );
+    }
 
-	if( m_draw_front && m_draw_back )
-		glDisable( GL_CULL_FACE );
-	else
-		glEnable( GL_CULL_FACE );
+    if( first || differ<Property::DrawFront >( g_current_renderstate )
+        || differ<Property::DrawBack >( g_current_renderstate ) )
+    {
+        if( get<Property::DrawFront>() && get<Property::DrawBack>() )
+            glDisable( GL_CULL_FACE );
+        else
+            glEnable( GL_CULL_FACE );
 
-	if( m_draw_front )
-	{
-		if( !m_draw_back )
-			glCullFace( GL_BACK );
-	}
-	else
-	{
-		if( m_draw_back )
-			glCullFace( GL_FRONT );
-		else
-			glCullFace( GL_FRONT_AND_BACK );
-	}
-}
+        if( get<Property::DrawFront>() )
+        {
+            if( !get<Property::DrawBack>() )
+                glCullFace( GL_BACK );
+        }
+        else
+        {
+            if( get<Property::DrawBack>() )
+                glCullFace( GL_FRONT );
+            else
+                glCullFace( GL_FRONT_AND_BACK );
+        }
+    }
 
-void RenderState::unbind()
-{
-	if( g_current_renderstate == this )
-		g_current_renderstate = 0;
+    first = false;
+    g_current_renderstate.m_pack = m_pack;
 }
 
 
 void RenderState::blend_mode( BlendMode mode )
 {
-	if( m_blend_mode != mode )
-	{
-		m_blend_mode = mode;
-		unbind();
-	}
+    set<Property::BlendMode>( mode );
 }
 
 void RenderState::depth_write( bool f )
 {
-	if( m_depth_write != f )
-	{
-		m_depth_write = f;
-		unbind();
-	}
+    set<Property::DepthWrite>( f );
 }
 
 void RenderState::depth_test( bool f )
 {
-	if( m_depth_test != f )
-	{
-		m_depth_test = f;
-		unbind();
-	}
+    set<Property::DepthTest>( f );
 }
 
 void RenderState::depth_compare( Compare comp )
 {
-	if( m_depth_compare != comp )
-	{
-		m_depth_compare = comp;
-		unbind();
-	}
+    set<Property::DepthCompare>( comp );
 }
 
 void RenderState::colour_write( bool f )
 {
-	if( m_colour_write != f )
-	{
-		m_colour_write = f;
-		unbind();
-	}
+    set<Property::ColourWrite>( f );
 }
 
 void RenderState::draw_front( bool f )
 {
-	if( m_draw_front != f )
-	{
-		m_draw_front = f;
-		unbind();
-	}
+    set<Property::DrawFront>( f );
 }
 
 void RenderState::draw_back( bool f )
 {
-	if( m_draw_back != f )
-	{
-		m_draw_back = f;
-		unbind();
-	}
+    set<Property::DrawBack>( f );
 }
 
-RenderState::Ptr const &RenderState::stock_opaque()
+RenderState RenderState::stock_opaque()
 {
-	static Ptr opaque( new RenderState );
-	return opaque;
+	return RenderState();
 }

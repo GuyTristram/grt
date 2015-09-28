@@ -183,4 +183,10 @@ void TextureTarget::attach( SharedPtr<RenderBuffer> const &buffer, BufferType ty
 void TextureTarget::do_bind()
 {
 	glBindFramebuffer( GL_FRAMEBUFFER, m_id );
+	GLsizei n = 0;
+	GLenum buffers[MAX_COLOUR_BUFFERS];
+	for( int i = 0; i < MAX_COLOUR_BUFFERS; ++i )
+		if( m_buffer[index( Colour, i )] )
+			buffers[n++] = GL_COLOR_ATTACHMENT0 + i;
+	glDrawBuffers( n, buffers );
 }

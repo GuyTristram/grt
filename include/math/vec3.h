@@ -1,6 +1,9 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include "vec2.h"
+#include <cmath>
+
 template< typename T >
 struct vec3
 {
@@ -9,6 +12,9 @@ struct vec3
 	vec3( T x, T y, T z ) : x( x ), y( y ), z( z ) {}
 	template< typename U >
 	explicit vec3( vec3<U> const &v ) : x( T( v.x ) ), y( T( v.y ) ), z( T( v.z ) ) {}
+
+    vec2<T> xy() const { return vec2<T>( x, y, z ); }
+    vec2<T> &xy() { return reinterpret_cast< vec2<T> &>( *this ); }
 
 	vec3<T> &operator+=( vec3<T> const &b ) {x += b.x; y += b.y; z += b.z; return *this;}
 	vec3<T> &operator-=( vec3<T> const &b ) {x -= b.x; y -= b.y; z -= b.z; return *this;}
@@ -22,6 +28,7 @@ struct vec3
 };
 
 typedef vec3<float> float3;
+typedef vec3<double> double3;
 typedef vec3<int> int3;
 typedef vec3<short> short3;
 typedef vec3<unsigned short> ushort3;

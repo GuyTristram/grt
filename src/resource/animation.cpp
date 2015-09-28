@@ -1,0 +1,1 @@
+#include "resource/animation.h"

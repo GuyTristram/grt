@@ -49,9 +49,9 @@ Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 
 	Material::Ptr font_material( new Material );
 
-	font_material->state = RenderState::Ptr( new RenderState( RenderState::Blend ) );
-	font_material->state->depth_write( false );
-	font_material->state->depth_test( false );
+    font_material->state = RenderState( BlendMode::Blend );
+	font_material->state.depth_write( false );
+	font_material->state.depth_test( false );
 	font_material->program = pool.shader_program( "ui.sp" );
 	font_material->uniforms.set( "u_texture", texture );
 
@@ -119,7 +119,7 @@ Font::Ptr load_ttf( CharRange range, int size, ResourcePool &pool )
 		char_info[i].advance = chardata[i].xadvance;
 	}
 	Material::Ptr font_material( new Material );
-	font_material->state = RenderState::Ptr( new RenderState( RenderState::Blend ) );
+    font_material->state = RenderState( BlendMode::Blend );
 	//font_material->program = shader_program( "ui.sp" );
 	font_material->program = pool.shader_program( "uifont.sp" );
 	font_material->uniforms.set( "u_texture", Texture2D::Ptr( new Texture2D( x_size, y_size, 1, &bitmap[0] ) ) );
@@ -222,7 +222,7 @@ struct StbLoader : public Uncopyable
 };
 }
 
-SharedPtr< Texture2D > ResourcePool::texture2d( char const *filename )
+SharedPtr< Texture2D > ResourcePool::texture2d( char const *filename, char const *options )
 {
 	auto tex = m_textures.find( filename );
 	if( tex != m_textures.end() )
@@ -236,7 +236,7 @@ SharedPtr< Texture2D > ResourcePool::texture2d( char const *filename )
 		return Texture2D::Ptr();
 	}
 
-	Texture2D::Ptr new_tex( new Texture2D( loader.x, loader.y, loader.n, ( void * )loader.data ) );
+	Texture2D::Ptr new_tex( new Texture2D( loader.x, loader.y, loader.n, ( void * )loader.data, options ) );
 
 	m_textures[ filename ] = new_tex;
 	return new_tex;

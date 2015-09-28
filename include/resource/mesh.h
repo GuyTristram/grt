@@ -12,6 +12,7 @@ struct Mesh
 {
 	RenderTarget::PrimitiveType type;
 	int patch_vertices;
+	int instances = 1;
 	IndexBuffer::Ptr  ib;
 	VertexBuffer::Ptr vb;
 	struct Bone

@@ -28,6 +28,7 @@ public:
 	void set( UniformBase const &uniform );
 	void set( UniformGroup const &group );
 
+	template< typename T > void set( UniformId<T> const &id, T const &value );
 	template< typename T > void set( char const *name, T const &value );
 
 	static Ptr const &stock_unlit();
@@ -67,9 +68,15 @@ private:
 template< typename T >
 void ShaderProgram::set( char const *name, T const &value )
 {
-	Uniform< T > u( name );
-	u.data = value;
-	set( u );
+	bind( );
+	UniformId<T>( name ).bind( value );
+}
+
+template< typename T >
+void ShaderProgram::set( UniformId<T> const &id, T const &value )
+{
+	bind( );
+	id.bind( value );
 }
 
 

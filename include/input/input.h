@@ -14,12 +14,15 @@ struct InputEvent
 		SystemKey,
 		KeyDown,
 		KeyUp,
-		MouseMove
+		MouseMove,
+		MouseWheel
 	};
 	InputEvent( Type type, int character ) : type( type ), character( character ) {}
 	InputEvent( Type type, float2 position ) : type( type ), position( position ) {}
 	Type type;
-	int character;
+	union {
+		int character; int wheel_change;
+	};
 	float2 position;
 };
 
@@ -35,6 +38,8 @@ public:
 
 	void set_mouse_position( float2 position );
 	float2 get_mouse_position();
+
+	void set_mouse_relative( bool relative );
 
 	struct EventHandler
 	{

@@ -31,8 +31,8 @@ public:
 	void render( Device &device, float44 const &cam_pos, float44 const &cam_pers,
 	             SceneNode &root );
 
-	virtual void visit( SceneMesh &mesh );
-	virtual void visit( SceneLight &light );
+    virtual void visit( SceneMesh &mesh ) override;
+    virtual void visit( SceneLight &light ) override;
 
 private:
 	//static const int SHADOW_SIZE = 2048;

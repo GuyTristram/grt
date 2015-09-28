@@ -50,11 +50,11 @@ public:
 
 	bool is_complete();
 
-	virtual int width() const;
-	virtual int height() const;
+	virtual int width() const override;
+    virtual int height() const override;
 
 private:
-	virtual void do_bind();
+    virtual void do_bind()  override;
 
 	unsigned int m_id;
 

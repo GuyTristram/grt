@@ -21,6 +21,7 @@ struct vec2
 };
 
 typedef vec2<float> float2;
+typedef vec2<double> double2;
 typedef vec2<int> int2;
 typedef vec2<short> short2;
 typedef vec2<unsigned short> ushort2;

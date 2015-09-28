@@ -16,8 +16,6 @@ GLuint compile( GLenum type, char const *source )
 
 	GLint status;
 	glGetShaderiv( shader, GL_COMPILE_STATUS, &status );
-	if( status == 0 )
-	{
 		GLint log_length;
 		glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &log_length );
 		if( log_length > 0 )
@@ -27,6 +25,8 @@ GLuint compile( GLenum type, char const *source )
 			printf( log );
 			free( log );
 		}
+	if( status == 0 )
+	{
 		glDeleteShader( shader );
 		return 0;
 	}
@@ -255,6 +255,8 @@ void ShaderProgram::get_uniform_info()
 		GLint size;
 		GLenum type;
 		glGetActiveUniform( m_program, i, 256, 0, &size, &type, name );
+		GLchar *bracket = std::find( name, name + strlen( name ), '[' );
+		*bracket = 0;
 		int location = glGetUniformLocation( m_program, name );
 
 		if( type == GL_SAMPLER_CUBE_SHADOW ) type = GL_SAMPLER_CUBE;

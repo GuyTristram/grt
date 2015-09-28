@@ -2,35 +2,36 @@
 #define RENDERSTATE_H
 
 #include "common/shared.h"
+#include "common/valuepack.h"
+#include <cstdint>
 
 
-class RenderState : public Shared
+enum class BlendMode
+{
+    Opaque,
+    Transparent,
+    Blend,
+    Add,
+    Count
+};
+
+enum class Compare
+{
+    Never,
+    Less,
+    Equal,
+    LEqual,
+    Greater,
+    NotEqual,
+    GEqual,
+    Always,
+    Count
+};
+
+class RenderState
 {
 public:
-	typedef SharedPtr< RenderState > Ptr;
-
-	enum BlendMode
-	{
-	    Opaque,
-	    Transparent,
-	    Blend,
-	    Add
-	};
-
-	enum Compare
-	{
-		Never,
-		Less,
-		Equal,
-		LEqual,
-		Greater,
-		NotEqual,
-		GEqual,
-		Always
-	};
-
-	explicit RenderState( BlendMode blend_mode = Opaque );
-	~RenderState();
+    explicit RenderState( BlendMode blend_mode = BlendMode::Opaque );
 
 	void blend_mode( BlendMode mode );
 
@@ -45,18 +46,38 @@ public:
 
 	void bind();
 
-	static Ptr const &stock_opaque();
+    static RenderState stock_opaque();
 
 private:
-	void unbind();
+    struct Property { enum Properties
+    {
+        BlendMode,
+        DepthCompare,
+        DepthWrite,
+        DepthTest,
+        DrawFront,
+        DrawBack,
+        ColourWrite
+    }; };
 
-	BlendMode m_blend_mode;
-	Compare m_depth_compare;
-	bool m_depth_write;
-	bool m_depth_test;
-	bool m_draw_front;
-	bool m_draw_back;
-	bool m_colour_write;
+    using Pack = grt::value_pack<std::uint32_t, BlendMode, Compare, bool, bool, bool, bool, bool>;
+    //using Pack = grt::enum_indexed_value_pack<Property, std::uint32_t, BlendMode, Compare, bool, bool, bool, bool, bool>;
+    Pack m_pack;
+
+/*
+    template<Property p, class T> void set(T v ) { m_pack.set<static_cast< size_t >( p )>( v ); }
+    //template<Property p>
+    //auto get() -> Pack::type_at<static_cast< size_t >( p )> { return m_pack.get<static_cast< size_t >( p )>(); }
+    template<Property p>
+    auto get()->decltype( m_pack.get<static_cast< size_t >( p )>() ) { return m_pack.get<static_cast< size_t >( p )>(); }
+    template<Property p>
+*/
+    template<size_t p, class T> void set( T v ) { m_pack.set<p>( v ); }
+    template<size_t p> Pack::type_at<p> get() { return m_pack.get<p>(); }
+
+
+    template<size_t p>
+    bool differ( RenderState other ) { return get<p>() != other.get<p>(); }
 };
 
 #endif // RENDERSTATE_H

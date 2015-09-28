@@ -8,12 +8,20 @@ struct AABB;
 class Frustum
 {
 public:
-	Frustum( float44 const &m );
+	explicit Frustum( float44 const &m );
 
 	bool intersect_sphere( float3 const &p, float radius ) const;
 	bool intersect_aabb( AABB const &aabb ) const;
 private:
 	float4 m_planes[6];
+};
+
+class FrustumD
+{
+public:
+	explicit FrustumD( double44 const &m );
+
+	double4 m_planes[6];
 };
 
 struct AABB

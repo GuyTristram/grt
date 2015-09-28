@@ -2,7 +2,7 @@
 #define SHARED_H
 
 #include "uncopyable.h"
-
+#include <utility>
 
 template< typename T >
 class SharedPtr

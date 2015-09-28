@@ -22,13 +22,13 @@ public:
 
 	void add_path( char const *path );
 
-	SharedPtr< ShaderProgram > shader_program( char const *filename );
-	SharedPtr< Texture2D > texture2d( char const *filename );
+	SharedPtr< ShaderProgram >  shader_program( char const *filename );
+	SharedPtr< Texture2D >      texture2d( char const *filename, char const *options = 0 );
 	SharedPtr< Texture2DArray > texture2d_array( std::vector< std::string > const &filenames, int size );
 	SharedPtr< Texture2DArray > texture2d_array( std::string const &filename );
-	SharedPtr< TextureCube > texture_cube( char const *filename, char const *ext );
-	SharedPtr< Font > font( char const *filename, int size );
-	SharedPtr< Image > image( char const *filename );
+	SharedPtr< TextureCube >    texture_cube( char const *filename, char const *ext );
+	SharedPtr< Font >           font( char const *filename, int size );
+	SharedPtr< Image >          image( char const *filename );
 
 	void reload_shader_program( char const *filename );
 

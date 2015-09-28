@@ -21,12 +21,12 @@ VertexBuffer::~VertexBuffer()
 }
 
 
-void VertexBuffer::add_attribute( char const *name, int type, int count, int size, bool dynamic, bool normalize )
+void VertexBuffer::add_attribute( char const *name, int type, int count, int size, bool dynamic, bool normalize, int div )
 {
 	m_attributes.push_back( Attribute( attribute_location( name ),
 	                                   type, count,
 	                                   dynamic ? m_dynamic_vertex_size : m_static_vertex_size,
-	                                   dynamic, normalize ) );
+	                                   dynamic, normalize, div ) );
 
 	if( dynamic )
 		m_dynamic_vertex_size += size;
@@ -50,6 +50,7 @@ void VertexBuffer::bind()
 				glVertexAttribPointer( *att->location, att->count, att->type,
 				                       att->normalize, m_static_vertex_size,
 				                       reinterpret_cast< GLvoid * >( att->offset ) );
+				glVertexAttribDivisor( *att->location, att->divisor );
 			}
 		}
 		glBindBuffer( GL_ARRAY_BUFFER, 0 );
@@ -62,9 +63,15 @@ void VertexBuffer::bind()
 			if( *att->location >= 0 && att->dynamic )
 			{
 				glEnableVertexAttribArray( *att->location );
-				glVertexAttribPointer( *att->location, att->count, att->type,
-				                       att->normalize, m_dynamic_vertex_size,
-				                       m_dynamic_data + att->offset );
+				if( att->type == GL_UNSIGNED_INT )
+					glVertexAttribIPointer( *att->location, att->count, att->type,
+						m_dynamic_vertex_size,
+						m_dynamic_data + att->offset );
+				else
+					glVertexAttribPointer( *att->location, att->count, att->type,
+						att->normalize, m_dynamic_vertex_size,
+						m_dynamic_data + att->offset );
+				glVertexAttribDivisor( *att->location, att->divisor );
 			}
 		}
 	}
@@ -74,7 +81,11 @@ void VertexBuffer::unbind()
 {
 	for( auto att = m_attributes.begin(); att != m_attributes.end(); ++att )
 		if( *att->location >= 0 )
+		{
 			glDisableVertexAttribArray( *att->location );
+			if( att->divisor )
+				glVertexAttribDivisor( *att->location, 0 );
+		}
 }
 
 
@@ -90,6 +101,21 @@ void VertexBuffer::reserve()
 		m_dynamic_data = reinterpret_cast< unsigned char * >( malloc( m_dynamic_vertex_size * m_vertex_count ) );
 
 	m_reserved = true;
+}
+
+void VertexBuffer::set_static_data( void *data, int size )
+{
+	if( m_static_data || m_gl_buffer )
+	{
+		//TODO handle error
+	}
+	else
+	{
+		glGenBuffers( 1, &m_gl_buffer );
+		glBindBuffer( GL_ARRAY_BUFFER, m_gl_buffer );
+		glBufferData( GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW );
+		glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	}
 }
 
 void VertexBuffer::commit()

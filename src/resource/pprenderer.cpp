@@ -123,7 +123,7 @@ void PPRenderer::render( Device &device,
 	RenderState rs_light;
 	rs_light.depth_test( true );
 	rs_light.depth_write( false );
-	rs_light.blend_mode( RenderState::Add );
+    rs_light.blend_mode( BlendMode::Add );
 
 	m_light_target->clear( true, false );
 	m_light_sh_program->set( m_light_uniforms );
@@ -137,13 +137,13 @@ void PPRenderer::render( Device &device,
 			continue;
 		if( length( ( m_lights[i]->position - world_from_camera.t ).xyz() ) > m_lights[i]->radius * 1.5f )
 		{
-			rs_light.depth_compare( RenderState::LEqual );
+            rs_light.depth_compare( Compare::LEqual );
 			rs_light.draw_back( false );
 			rs_light.draw_front( true );
 		}
 		else
 		{
-			rs_light.depth_compare( RenderState::Greater );
+            rs_light.depth_compare( Compare::Greater );
 			rs_light.draw_back( true );
 			rs_light.draw_front( false );
 		}
@@ -184,7 +184,7 @@ void PPRenderer::render( Device &device,
 	RenderState rs_quad;
 
 	rs_quad.depth_test( true );
-	rs_quad.depth_compare( RenderState::Less );
+    rs_quad.depth_compare( Compare::Less );
 	rs_quad.depth_write( true );
 
 	m_quad.draw( *m_hdr_program, rs_quad, device );
@@ -212,21 +212,7 @@ void PPRenderer::draw_meshes( Shader shader, RenderState &s, RenderTarget &t, Fr
 			p->set( "u_t_normal", float33( wfl.i.xyz( ), wfl.j.xyz( ), wfl.k.xyz( ) ) );
 			p->set( "u_t_clip_from_model", projected_from_world * wfl );
 			p->set( "u_t_clip_from_world",  projected_from_world );
-			if( m->bones.size() )
-			{
-				p->set( "u_skinned", true );
-				std::vector< float44 > bone_transforms( m->bones.size() );
-				for( int i = 0; i != m->bones.size(); ++i )
-				{
-					bone_transforms[i] = m->bones[i]->world_from_local() * m->mesh.bones[i].bone_from_model;
-				}
-				p->set( "u_t_bone_transforms[0]", bone_transforms );
-			}
-			else
-			{
-				p->set( "u_skinned", false );
-			}
-			std::vector< float44 > trans;
+			m->set_bones( *p );
 			p->set( m->material->uniforms );
 			m->mesh.draw( *p, s, t );
 		}
@@ -282,20 +268,7 @@ void PPRenderer::update_light( SceneLight &light )
 			{
 				if( frustum.intersect_aabb( m->aabb ) )
 				{
-					if( m->bones.size() )
-					{
-						m_shadow_program->set( "u_skinned", true );
-						std::vector< float44 > bone_transforms( m->bones.size() );
-						for( int i = 0; i != m->bones.size(); ++i )
-						{
-							bone_transforms[i] = m->bones[i]->world_from_local() * m->mesh.bones[i].bone_from_model;
-						}
-						m_shadow_program->set( "u_t_bone_transforms[0]", bone_transforms );
-					}
-					else
-					{
-						m_shadow_program->set( "u_skinned", false );
-					}
+					m->set_bones( *m_shadow_program );
 					m_shadow_program->set( "u_t_clip_from_model", proj_from_world * m->world_from_local() );
 					m->mesh.draw( *m_shadow_program, m_shadow_state, *m_near_shadow_target );
 				}
@@ -308,21 +281,8 @@ void PPRenderer::update_light( SceneLight &light )
 			{
 				if( frustum.intersect_aabb( m->aabb ) )
 				{
-					if( m->bones.size() )
-					{
-						m_shadow_program->set( "u_skinned", true );
-						std::vector< float44 > bone_transforms( m->bones.size() );
-						for( int i = 0; i != m->bones.size(); ++i )
-						{
-							bone_transforms[i] = m->bones[i]->world_from_local() * m->mesh.bones[i].bone_from_model;
-						}
-						m_shadow_program->set( "u_t_bone_transforms[0]", bone_transforms );
-					}
-					else
-					{
-						m_shadow_program->set( "u_skinned", false );
-					}
-					m_shadow_program->set( "u_t_clip_from_model", proj_from_world * m->world_from_local() );
+					m->set_bones( *m_shadow_program );
+					m_shadow_program->set( "u_t_clip_from_model", proj_from_world * m->world_from_local( ) );
 					m->mesh.draw( *m_shadow_program, m_shadow_state, *m_far_shadow_target );
 				}
 			}
@@ -347,6 +307,7 @@ void PPRenderer::update_light( SceneLight &light )
 void PPRenderer::visit( SceneMesh &mesh )
 {
 	m_meshes.push_back( &mesh );
+	mesh.update_bones();
 }
 
 void PPRenderer::visit( SceneLight &light )

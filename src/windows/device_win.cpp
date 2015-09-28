@@ -33,10 +33,21 @@ bool WGLExtensionSupported(const char *extension_name)
 }
 
 
-Device::Device() : m_impl( new DeviceImpl )
+Device::Device( Options const &options ) : m_impl( new DeviceImpl )
 {
-	m_impl->width = 1920;
-	m_impl->height = 1200;
+	int s_width = GetSystemMetrics( SM_CXSCREEN );
+	int s_height = GetSystemMetrics( SM_CYSCREEN );
+
+	m_impl->width = options.width;
+	m_impl->height = options.height;
+	if( options.width < 1 )
+	{
+		m_impl->width = options.fullscreen ? s_width : 800;
+	}
+	if( options.height < 1 )
+	{
+		m_impl->height = options.fullscreen ? s_height : 600;
+	}
 	WNDCLASS wc;
 	// register window class
 	wc.style = CS_OWNDC;
@@ -51,14 +62,15 @@ Device::Device() : m_impl( new DeviceImpl )
 	wc.lpszClassName = "GLSample";
 	RegisterClass( &wc );
 	
-	RECT rect = { 20, 20, 20 + m_impl->width, 20 + m_impl->height };
-	AdjustWindowRectEx( &rect, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE, 0, 0 );
-	// create main window
-	m_impl->hWnd = CreateWindow( 
-		"GLSample", "OpenGL Sample", 
-		WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE,
+	int style = options.fullscreen ? WS_POPUP | WS_VISIBLE : WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE;
+    int x = options.fullscreen ? 0 : 100;
+    int y = x;
+    RECT rect = { x, y, x + m_impl->width, y + m_impl->height };
+    AdjustWindowRect( &rect, style, false );
+
+	m_impl->hWnd = CreateWindow( "GLSample", "OpenGL Sample", style,
 		rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
-		NULL, NULL, GetModuleHandle(0), NULL );
+		NULL, NULL, GetModuleHandle( 0 ), NULL );
 
 	SetWindowLongPtr( m_impl->hWnd, GWLP_USERDATA, (LONG)this );
 	

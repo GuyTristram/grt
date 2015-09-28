@@ -1,7 +1,7 @@
 #include "resource/material.h"
 
 Material::Material( ShaderProgram::Ptr const &program,
-                    RenderState::Ptr const &state )
+                    RenderState state )
 	: program( program ), state( state ) {}
 
 void Material::bind()
@@ -11,6 +11,5 @@ void Material::bind()
 		program->bind();
 		program->set( uniforms );
 	}
-	if( state )
-		state->bind();
+    state.bind();
 }

@@ -28,7 +28,9 @@ struct vec4
 };
 
 typedef vec4<float> float4;
+typedef vec4<double> double4;
 typedef vec4<int> int4;
+typedef vec4<unsigned int> uint4;
 typedef vec4<short> short4;
 typedef vec4<unsigned short> ushort4;
 typedef vec4<signed char> char4;

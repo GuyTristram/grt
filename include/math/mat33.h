@@ -20,6 +20,7 @@ struct mat33
 };
 
 typedef mat33< float > float33;
+typedef mat33< double > double33;
 
 template< typename T >  vec3<T> operator*( mat33<T> const &a, vec3<T> const &b );
 template< typename T >  mat33<T> operator*( mat33<T> const &a, mat33<T> const & b );

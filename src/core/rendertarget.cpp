@@ -37,8 +37,10 @@ RenderTarget::~RenderTarget()
 		g_current_rendertarget = 0;
 }
 
-void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, IndexBuffer &ib, int patch_vertices )
+void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, IndexBuffer &ib, int patch_vertices, int instances )
 {
+	if( ib.count() == 0 )
+		return;
 	bind();
 	sp.bind();
 	rs.bind();
@@ -46,12 +48,15 @@ void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type,
 	sp.bind_textures();
 	if( type == Patches )
 		glPatchParameteri( GL_PATCH_VERTICES, patch_vertices );
-	glDrawElements( gl_primitive( type ), ib.count(), GL_UNSIGNED_SHORT, ib.indices() );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER , 0 );
+	if( instances == 1 )
+		glDrawElements( gl_primitive( type ), ib.count(), GL_UNSIGNED_SHORT, ib.indices() );
+	else
+		glDrawElementsInstanced( gl_primitive( type ), ib.count( ), GL_UNSIGNED_SHORT, ib.indices( ), instances );
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	vb.unbind();
 }
 
-void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, int patch_vertices )
+void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type, VertexBuffer &vb, int patch_vertices, int instances )
 {
 	bind();
 	sp.bind();
@@ -60,7 +65,7 @@ void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type,
 	sp.bind_textures();
 	if( type == Patches )
 		glPatchParameteri( GL_PATCH_VERTICES, patch_vertices );
-	glDrawArrays( gl_primitive( type ), 0, vb.vertex_count( ) );
+	glDrawArraysInstanced( gl_primitive( type ), 0, vb.vertex_count( ), instances );
 	vb.unbind();
 }
 
@@ -96,7 +101,7 @@ void RenderTarget::bind()
 	if( g_current_rendertarget != this )
 	{
 		do_bind();
-		glViewport( 0, 0, width(), height() );
+        setViewport();
 		g_current_rendertarget = this;
 	}
 }
@@ -104,4 +109,33 @@ void RenderTarget::bind()
 void RenderTarget::unbind()
 {
 	g_current_rendertarget = 0;
+}
+
+void RenderTarget::pushViewport( Viewport const &vp )
+{
+    m_viewports.push_back( vp );
+    if( g_current_rendertarget == this )
+        setViewport();
+}
+
+void RenderTarget::popViewport()
+{
+    if( m_viewports.empty() )
+        return;
+    m_viewports.pop_back();
+    if( g_current_rendertarget == this )
+        setViewport();
+}
+
+void RenderTarget::setViewport()
+{
+    if( m_viewports.empty() )
+    {
+        glViewport( 0, 0, width(), height() );
+    }
+    else
+    {
+        Viewport const &vp = m_viewports.back();
+        glViewport( vp.x, vp.y, vp.width, vp.height );
+    }
 }

@@ -20,6 +20,7 @@ struct mat22
 };
 
 typedef mat22< float > float22;
+typedef mat22< double > double22;
 
 template< typename T >  vec2<T> operator*( mat22<T> const &a, vec2<T> const &b );
 template< typename T >  mat22<T> operator*( mat22<T> const &a, mat22<T> const & b );

@@ -1,11 +1,12 @@
 #include "resource/mesh.h"
+#include "core/shaderprogram.h"
 
 void Mesh::draw( ShaderProgram &sp, RenderState &rs, RenderTarget &rt )
 {
-	if( ib.get() )
-		rt.draw( sp, rs, type, *vb, *ib, patch_vertices );
+	if( ib.get( ) )
+		rt.draw( sp, rs, type, *vb, *ib, patch_vertices, instances );
 	else if( vb.get() )
-		rt.draw( sp, rs, type, *vb, patch_vertices );
+		rt.draw( sp, rs, type, *vb, patch_vertices, instances );
 }
 
 Mesh make_cube()

@@ -12,16 +12,26 @@ struct DeviceImpl;
 class Device : public RenderTarget, Uncopyable
 {
 public:
-	Device();
+	struct Options
+	{
+		Options( int width = -1, int height = -1, bool fullscreen = false )
+		: width(width), height(height), fullscreen(fullscreen) {}
+		int width;
+		int height;
+		bool fullscreen;
+	};
+
+	Device( Options const &options = Options() );
 	~Device();
 
 	void swap();
 
-	virtual int width() const;
-	virtual int height() const;
+    virtual int width() const override;
+    virtual int height() const override;
+
 
 private:
-	virtual void do_bind();
+    virtual void do_bind() override;
 	SharedPtr< DeviceImpl > m_impl;
 };
 

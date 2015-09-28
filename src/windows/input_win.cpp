@@ -15,6 +15,9 @@ struct InputImpl : public Shared
 
 	bool m_key_down[ Keys::count ];
 	bool m_caps_on;
+
+	bool m_mouse_relative = false;
+	float2 m_abs_mouse;
 };
 
 namespace
@@ -264,10 +267,26 @@ void Input::do_messages( EventHandler &handler )
 			}
 			break;
 		case WM_MOUSEMOVE:
-			handler.do_event( InputEvent( InputEvent::MouseMove,
-					float2( float(GET_X_LPARAM(msg.lParam)),
-					        float(GET_Y_LPARAM(msg.lParam)) ) ) );
-			break;
+			if( m_impl->m_mouse_relative )
+			{
+				handler.do_event( InputEvent( InputEvent::MouseMove,
+					float2( float( GET_X_LPARAM( msg.lParam ) ),
+					        float( GET_Y_LPARAM( msg.lParam ) ) ) - float2( 300.f, 300.f ) ) );
+				if( GET_X_LPARAM( msg.lParam ) != 300 || GET_Y_LPARAM( msg.lParam ) != 300 )
+					set_mouse_position( float2( 300.f, 300.f ) );
+			}
+			else
+			{
+				handler.do_event( InputEvent( InputEvent::MouseMove,
+					float2( float( GET_X_LPARAM( msg.lParam ) ),
+					float( GET_Y_LPARAM( msg.lParam ) ) ) ) );
+			}
+			break; 
+
+		case WM_MOUSEWHEEL:
+			handler.do_event( InputEvent( InputEvent::MouseWheel,
+				GET_WHEEL_DELTA_WPARAM( msg.wParam ) ) );
+			break; 
 
 		case WM_LBUTTONDOWN:
 			handler.do_event( InputEvent( InputEvent::KeyDown, Keys::mouse0 ) );
@@ -310,4 +329,18 @@ float2 Input::get_mouse_position()
 	POINT point;
 	GetCursorPos( &point );
 	return float2( (float)point.x, (float)point.y );
+}
+
+void Input::set_mouse_relative( bool relative )
+{
+	m_impl->m_mouse_relative = relative;
+	if( relative )
+	{
+		m_impl->m_abs_mouse = get_mouse_position();
+		set_mouse_position( float2( 300.f, 300.f ) );
+	}
+	else
+	{
+		set_mouse_position( m_impl->m_abs_mouse );
+	}
 }

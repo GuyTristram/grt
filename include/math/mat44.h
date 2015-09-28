@@ -12,6 +12,8 @@ struct mat44
 	typedef vec4< T > column;
 	mat44() : i( 1,0,0,0 ), j( 0,1,0,0 ), k( 0,0,1,0 ), t( 0,0,0,1 ) {}
 	mat44( column const &i, column const &j, column const &k, column const &t ) : i( i ), j( j ), k( k ), t( t ) {}
+	template< typename U >
+	explicit mat44( mat44<U> const &m ) : i( column( m.i ) ), j( column( m.j ) ), k( column( m.k ) ), t( column( m.t ) ) {}
 
 	column &operator[]( int index ) {return *( &i + index );}
 	column const &operator[]( int index ) const {return *( &i + index );}
@@ -22,6 +24,7 @@ struct mat44
 };
 
 typedef mat44< float > float44;
+typedef mat44< double > double44;
 
 template< typename T >  vec4<T> operator*( mat44<T> const &a, vec4<T> const &b );
 template< typename T >  mat44<T> operator*( mat44<T> const &a, mat44<T> const & b );

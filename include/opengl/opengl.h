@@ -3,7 +3,8 @@
 
 #ifdef _WIN32
 #define NOMINMAX
-#include <windows.h>
+//#define WIN32_LEAN_AND_MEAN
+//#include <windows.h>
 #include "GL3/gl3w.h"
 #include <gl/gl.h>
 #else

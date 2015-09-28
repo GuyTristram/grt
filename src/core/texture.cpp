@@ -8,7 +8,10 @@ void tex_params( GLenum target, int channels, char const *options,
                  GLenum &int_format, GLenum &format, GLenum &type, bool &is_mipmapped )
 {
 	type = GL_UNSIGNED_BYTE;
-	GLint wrap_s = GL_REPEAT;
+    bool is_signed = true;
+    bool is_integer = false;
+    bool is_short = false;
+    GLint wrap_s = GL_REPEAT;
 	GLint wrap_t = GL_REPEAT;
 	GLint min_filter = GL_LINEAR_MIPMAP_LINEAR;
 	GLint max_filter = GL_LINEAR;
@@ -19,9 +22,10 @@ void tex_params( GLenum target, int channels, char const *options,
 		if( *options == 'f' )      { type = GL_FLOAT; }
 		else if( *options == 'c' ) { wrap_s = GL_CLAMP_TO_EDGE; wrap_t = GL_CLAMP_TO_EDGE; }
 		else if( *options == 'd' ) { channels = 0; }
-		else if( *options == 's' ) { type = GL_UNSIGNED_SHORT; }
-		else if( *options == 'i' ) { type = GL_UNSIGNED_INT; }
-		else if( *options == 'l' ) { max_filter = GL_LINEAR; }
+        else if( *options == 's' ) { is_short = true; }
+        else if( *options == 'i' ) { is_integer = true; }
+        else if( *options == 'u' ) { is_signed = false; }
+        else if( *options == 'l' ) { max_filter = GL_LINEAR; }
 		else if( *options == 'n' ) { max_filter = GL_NEAREST; }
 		else if( *options == '0' ) { min_filter = GL_NEAREST; }
 		else if( *options == '1' ) { min_filter = GL_LINEAR; }
@@ -33,18 +37,44 @@ void tex_params( GLenum target, int channels, char const *options,
 		++options;
 	}
 
+    if( is_short )
+        type = is_signed ? GL_SHORT : GL_UNSIGNED_SHORT;
+    else if( is_integer )
+        type = is_signed ? GL_INT : GL_UNSIGNED_INT;
+
 	static const GLenum formats[5]       = {GL_DEPTH_COMPONENT,    GL_RED,   GL_RG,     GL_RGB,     GL_RGBA};
 	static const GLenum float_formats[5] = {GL_DEPTH_COMPONENT32F, GL_R32F,  GL_RG32F,  GL_RGB32F,  GL_RGBA32F};
-	static const GLenum short_formats[5] = {GL_DEPTH_COMPONENT16,  GL_R16,   GL_RG16,   GL_RGB16,   GL_RGBA16};
-	static const GLenum int_formats[5]   = {GL_DEPTH_COMPONENT32,  GL_R32UI, GL_RG32UI, GL_RGB32UI, GL_RGBA32UI};
+    static const GLenum short_formats[5] = { GL_DEPTH_COMPONENT16, GL_R16, GL_RG16, GL_RGB16, GL_RGBA16 };
+    static const GLenum short_int_formats[5] = { GL_DEPTH_COMPONENT16, GL_R16I, GL_RG16I, GL_RGB16I, GL_RGBA16I };
+    static const GLenum short_uint_formats[5] = { GL_DEPTH_COMPONENT16, GL_R16UI, GL_RG16UI, GL_RGB16UI, GL_RGBA16UI };
+    //static const GLenum int_formats[5] = { GL_DEPTH_COMPONENT32, GL_R32UI, GL_RG32UI, GL_RGB32UI, GL_RGBA32UI };
+    static const GLenum int_formats[5] = { GL_DEPTH_COMPONENT32, GL_R32I, GL_RG32I, GL_RGB32I, GL_RGBA32I };
+    static const GLenum uint_formats[5] = { GL_DEPTH_COMPONENT32, GL_R32UI, GL_RG32UI, GL_RGB32UI, GL_RGBA32UI };
 
 	format = formats[channels];
-	if( type == GL_FLOAT )
-		int_format = float_formats[channels];
-	else if( type == GL_UNSIGNED_SHORT )
-		int_format = short_formats[channels];
-	else if( type == GL_UNSIGNED_INT )
-		int_format = int_formats[channels];
+    if( type == GL_FLOAT )
+    {
+        int_format = float_formats[channels];
+    }
+    else if( is_short )
+    {
+        if( is_integer )
+        {
+            if( is_signed )
+                int_format = short_int_formats[channels];
+            else
+                int_format = short_uint_formats[channels];
+        }
+        else
+            int_format = short_formats[channels];
+    }
+    else if( is_integer )
+    {
+        if( is_signed )
+            int_format = int_formats[channels];
+        else
+            int_format = uint_formats[channels];
+    }
 	else
 		int_format = format;
 
