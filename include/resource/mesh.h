@@ -7,6 +7,7 @@
 
 class ShaderProgram;
 class RenderState;
+class Font;
 
 struct Mesh
 {
@@ -26,5 +27,6 @@ struct Mesh
 
 Mesh make_cube();
 Mesh make_quad();
+Mesh make_text( Font const& font, char const *text );
 
 #endif // MESH_H

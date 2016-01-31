@@ -1,5 +1,7 @@
 #include "resource/mesh.h"
+#include "resource/font.h"
 #include "core/shaderprogram.h"
+#include <cstring>
 
 void Mesh::draw( ShaderProgram &sp, RenderState &rs, RenderTarget &rt )
 {
@@ -156,5 +158,49 @@ Mesh make_quad()
 	*norm_it++ = float3( 0.f, 0.f, 1.f );
 	*norm_it++ = float3( 0.f, 0.f, 1.f );
 	*norm_it++ = float3( 0.f, 0.f, 1.f );
+	return mesh;
+}
+
+Mesh make_text( Font const& font, char const *text )
+{
+	Mesh mesh;
+	mesh.type = RenderTarget::Triangles;
+	mesh.vb = VertexBuffer::Ptr( new VertexBuffer );
+	mesh.ib = IndexBuffer::Ptr( new IndexBuffer );
+
+	auto pos_att = mesh.vb->add_attribute< float3 >( "a_position" );
+	auto uv_att = mesh.vb->add_attribute< float2 >( "a_uv0" );
+	auto norm_att = mesh.vb->add_attribute< float3 >( "a_normal" );
+
+	mesh.vb->vertex_count( 4 * std::strlen(text) );
+
+	auto pos_it = pos_att.begin();
+	auto uv_it = uv_att.begin();
+	auto norm_it = norm_att.begin();
+	float x = 0.f;
+	int i = 0;
+	float xscale = font.image_width() / font.height();
+	float yscale = -font.image_height() / font.height();
+	while( *text )
+	{
+		auto char_info = font.char_info( *text );
+		*pos_it++ = float3( x + char_info->ul.x * xscale, char_info->ul.y * yscale, 0.f );
+		*pos_it++ = float3( x + char_info->ul.x * xscale, char_info->br.y * yscale, 0.f );
+		*pos_it++ = float3( x + char_info->br.x * xscale, char_info->ul.y * yscale, 0.f );
+		*pos_it++ = float3( x + char_info->br.x * xscale, char_info->br.y * yscale, 0.f );
+		*uv_it++ = float2( char_info->ul.x, char_info->ul.y );
+		*uv_it++ = float2( char_info->ul.x, char_info->br.y );
+		*uv_it++ = float2( char_info->br.x, char_info->ul.y );
+		*uv_it++ = float2( char_info->br.x, char_info->br.y );
+		*norm_it++ = float3( 0.f, 0.f, 1.f );
+		*norm_it++ = float3( 0.f, 0.f, 1.f );
+		*norm_it++ = float3( 0.f, 0.f, 1.f );
+		*norm_it++ = float3( 0.f, 0.f, 1.f );
+		mesh.ib->add( i + 0 ).add( i + 1 ).add( i + 2 ).add( i + 2 ).add( i + 1 ).add( i + 3 );
+		i += 4;
+		++text;
+		x += xscale * char_info->advance / font.image_width();
+	}
+
 	return mesh;
 }

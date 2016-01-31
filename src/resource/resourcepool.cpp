@@ -37,6 +37,57 @@ unsigned int next_higher_power_of_two( unsigned int v ) // compute the next high
 }
 
 
+Font::Ptr load_bdf( CharRange range, ResourcePool &pool )
+{
+	CharRange bitmap = read_token( range );
+
+	Texture2D::Ptr texture = pool.texture2d( to_std_string( bitmap ).c_str() );
+
+	Material::Ptr font_material( new Material );
+
+	font_material->state = RenderState( BlendMode::Blend );
+	font_material->state.depth_write( false );
+	font_material->state.depth_test( false );
+	font_material->program = pool.shader_program( "ui.sp" );
+	font_material->uniforms.set( "u_texture", texture );
+
+	int width = read_int( range );
+	int height = read_int( range );
+	int size = read_int( range );
+	int padding = read_int( range );
+	int first = read_int( range );
+	int last = read_int( range );
+
+	std::vector< Font::CharInfo > char_info;
+	char_info.resize( last - first + 1 );
+
+	int c;
+	do 
+	{
+		c = read_int( range );
+		int left = read_int( range );
+		int top = read_int( range );
+		int right = read_int( range ) + left;
+		int bottom = read_int( range ) + bottom;
+		int off_x = read_int( range );
+		int off_y = read_int( range );
+		int advance = read_int( range );
+
+		if( c >= first && c <= last )
+		{
+			char_info[c - first].ul = float2( left / float( width ),
+				top / float( height ) );
+			char_info[c - first].br = float2( right / float( width ),
+				bottom / float( height ) );
+
+			char_info[c - first].off = float2( off_x / float( width ), off_y / float( height ) );
+			char_info[c - first].advance = float( advance / float( width ) );
+		}
+	} while( c != last );
+	return Font::Ptr( new Font( font_material, float( size ), width, height, first,
+		char_info.size(), char_info.data() ) );
+}
+
 Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 {
 	read_int( range ); // Ignore major version
@@ -45,11 +96,11 @@ Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 
 	CharRange bitmap = read_token( range );
 
-	Texture2D::Ptr texture = pool.texture2d( to_std_string( bitmap ).c_str() ) ;
+	Texture2D::Ptr texture = pool.texture2d( to_std_string( bitmap ).c_str() );
 
 	Material::Ptr font_material( new Material );
 
-    font_material->state = RenderState( BlendMode::Blend );
+	font_material->state = RenderState( BlendMode::Blend );
 	font_material->state.depth_write( false );
 	font_material->state.depth_test( false );
 	font_material->program = pool.shader_program( "ui.sp" );
@@ -83,15 +134,15 @@ Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 			char_info.resize( c + 1 );
 
 		char_info[c].ul = float2( left / float( width ),
-		                          top / float( height ) );
+			top / float( height ) );
 		char_info[c].br = float2( right / float( width ),
-		                          bottom / float( height ) );
+			bottom / float( height ) );
 		char_info[c].off = float2( 0, 0 );
 		char_info[c].advance = float( right - left );
 		ignore( range, '\n' );
 	}
 	return Font::Ptr( new Font( font_material, float( char_height ), width, height, first,
-	                            char_info.size() - first, &char_info[first] ) );
+		char_info.size() - first, &char_info[first] ) );
 }
 
 Font::Ptr load_ttf( CharRange range, int size, ResourcePool &pool )
@@ -444,13 +495,23 @@ SharedPtr< Font > ResourcePool::font( char const *filename, int size )
 	if( range.empty() )
 		return Font::Ptr();
 
+	Font::Ptr new_font;
+	if( std::string( filename ).find( ".trd" ) != std::string::npos )
+	{
+		new_font = load_trd( range, *this );
+	}
+	else if( std::string( filename ).find( ".bdf" ) != std::string::npos )
+	{
+		new_font = load_bdf( range, *this );
+	}
+	else
+	{
 #ifdef GRT_USE_FREETYPE
-	Font::Ptr new_font = std::string( filename ).find( ".trd" ) == std::string::npos ?
-	                     load_freetype( range, size, *this ) : load_trd( range, *this );
+		new_font = load_freetype( range, size, *this );
 #else
-	Font::Ptr new_font = std::string( filename ).find( ".trd" ) == std::string::npos ?
-	                     load_ttf( range, size, *this ) : load_trd( range, *this );
+		new_font = load_ttf( range, size, *this );
 #endif
+	}
 	m_fonts[ key ] = new_font;
 	return new_font;
 }

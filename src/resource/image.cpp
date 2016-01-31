@@ -9,6 +9,7 @@ Image::Image( int width, int height, int channels, void *data )
 	std::copy( (unsigned char *)data, (unsigned char *)data + size, m_data.begin() );
 }
 
+
 uchar4 Image::get( int x, int y )
 {
 	uchar4 res( 0, 0, 0, 0 );

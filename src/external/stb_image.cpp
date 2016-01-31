@@ -165,7 +165,7 @@ static int stdio_read(void *user, char *data, int size)
    return (int) fread(data,1,size,(FILE*) user);
 }
 
-static void stdio_skip(void *user, unsigned n)
+static void stdio_skip(void *user, int n)
 {
    fseek((FILE*) user, n, SEEK_CUR);
 }
