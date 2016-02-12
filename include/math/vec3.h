@@ -126,7 +126,7 @@ T manhattan( vec3<T> const &v )
 template< typename T >
 vec3<T> abs( vec3<T> const &v )
 {
-	return vec3<T>( abs( v.x ), abs( v.y ), abs( v.z ) );
+	return vec3<T>( std::abs( v.x ), std::abs( v.y ), std::abs( v.z ) );
 }
 
 

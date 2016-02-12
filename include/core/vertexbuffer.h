@@ -14,19 +14,19 @@ struct VertexType
 {
 };
 
-#define GL_TYPE( type_in, gl_type ) template<> struct VertexType< type_in > {static const int type = gl_type; static const int count = 1;}; \
+#define GRT_GL_TYPE( type_in, gl_type ) template<> struct VertexType< type_in > {static const int type = gl_type; static const int count = 1;}; \
      template<int N> struct VertexType< type_in[N] > {static const int type = gl_type; static const int count = N;};
 
 
-GL_TYPE( signed char, GL_BYTE )
-GL_TYPE( char, GL_BYTE )
-GL_TYPE( unsigned char, GL_UNSIGNED_BYTE )
-GL_TYPE( short int, GL_SHORT )
-GL_TYPE( unsigned short int, GL_UNSIGNED_SHORT )
-GL_TYPE( int, GL_INT )
-GL_TYPE( unsigned int, GL_UNSIGNED_INT )
-GL_TYPE( float, GL_FLOAT )
-GL_TYPE( double, GL_DOUBLE )
+GRT_GL_TYPE( signed char, GL_BYTE )
+GRT_GL_TYPE( char, GL_BYTE )
+GRT_GL_TYPE( unsigned char, GL_UNSIGNED_BYTE )
+GRT_GL_TYPE( short int, GL_SHORT )
+GRT_GL_TYPE( unsigned short int, GL_UNSIGNED_SHORT )
+GRT_GL_TYPE( int, GL_INT )
+GRT_GL_TYPE( unsigned int, GL_UNSIGNED_INT )
+GRT_GL_TYPE( float, GL_FLOAT )
+GRT_GL_TYPE( double, GL_DOUBLE )
 template<typename T> struct VertexType< vec2<T> >
 {
 	static const int type = VertexType<T>::type;
@@ -79,8 +79,9 @@ class VertexBuffer : public Shared
 {
 public:
 	typedef SharedPtr< VertexBuffer > Ptr;
-	VertexBuffer() : m_static_data( 0 ), m_dynamic_data( 0 ), m_gl_buffer( 0 ), m_vertex_count( 0 ),
+	VertexBuffer() : m_gl_buffer( 0 ), m_vertex_count( 0 ),
 		m_static_vertex_size( 0 ), m_dynamic_vertex_size( 0 ),
+        m_static_data( 0 ), m_dynamic_data( 0 ),
 		m_reserved( false ) {}
 	~VertexBuffer();
 
@@ -103,9 +104,9 @@ public:
 		reserve();
 		Attribute &att = m_attributes[ index ];
 		if( att.dynamic )
-			return VertexAttribute< T >::Iterator( m_dynamic_data + att.offset, m_dynamic_vertex_size );
+			return typename VertexAttribute< T >::Iterator( m_dynamic_data + att.offset, m_dynamic_vertex_size );
 		else
-			return VertexAttribute< T >::Iterator( m_static_data + att.offset, m_static_vertex_size );
+			return typename VertexAttribute< T >::Iterator( m_static_data + att.offset, m_static_vertex_size );
 	}
 
 	void bind();

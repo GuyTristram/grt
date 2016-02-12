@@ -2,6 +2,9 @@
 #include "resource/material.h"
 //#include "opengl.h"
 
+namespace grt
+{
+
 Font::Font( SharedPtr< Material > const &material, float height,
             int image_width, int image_height,
             int first_char, int char_count,
@@ -58,4 +61,5 @@ float2 Font::measure( char const *text, int len ) const
 	result.x;
 	result.y *= m_image_height;
 	return result;
+}
 }

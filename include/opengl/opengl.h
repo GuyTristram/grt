@@ -8,7 +8,11 @@
 #include "GL3/gl3w.h"
 #include <gl/gl.h>
 #else
-#include <GLES2/gl2.h>
+//#include <GLES2/gl2.h>
+#include "GL3/gl3w.h"
+
+//#include <GL3/gl3.h>
+//#include <GL/glext.h>
 #endif
 
 #endif // OPENGL_H

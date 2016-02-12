@@ -11,7 +11,10 @@ class Texture2D;
 class Texture2DArray;
 class TextureCube;
 class ShaderProgram;
+namespace grt
+{
 class Font;
+}
 class Image;
 
 class ResourcePool : public Shared
@@ -27,7 +30,7 @@ public:
 	SharedPtr< Texture2DArray > texture2d_array( std::vector< std::string > const &filenames, int size );
 	SharedPtr< Texture2DArray > texture2d_array( std::string const &filename );
 	SharedPtr< TextureCube >    texture_cube( char const *filename, char const *ext );
-	SharedPtr< Font >           font( char const *filename, int size );
+	SharedPtr< grt::Font >      font( char const *filename, int size );
 	SharedPtr< Image >          image( char const *filename );
 
 	void reload_shader_program( char const *filename );
@@ -42,7 +45,7 @@ private:
 	std::map< std::string, SharedPtr< Texture2DArray > > m_texture_arrays;
 	std::map< std::string, SharedPtr< TextureCube > > m_cube_textures;
 	std::map< std::string, SharedPtr< ShaderProgram > > m_shader_programs;
-	std::map< std::pair< std::string, int >, SharedPtr< Font > > m_fonts;
+	std::map< std::pair< std::string, int >, SharedPtr< grt::Font > > m_fonts;
 	std::vector< std::string > m_path;
 };
 

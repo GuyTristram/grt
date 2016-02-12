@@ -18,7 +18,7 @@ CharRangeFile::CharRangeFile( char const *filename )
 	is.seekg( 0, ios::beg );
 
 	// allocate memory:
-	char *buffer = new char[ unsigned int( length + 1 ) ];
+	char *buffer = new char[ (unsigned int) length + 1 ];
 	buffer[length] = 0;
 
 	// read data as a block:
@@ -37,6 +37,12 @@ CharRangeFile::~CharRangeFile()
 void eat_white( CharRange &range )
 {
 	while( !range.empty() && isspace( range.front() ) )
+		++range;
+}
+
+void eat_to_white( CharRange &range )
+{
+	while( !range.empty() && !isspace( range.front() ) )
 		++range;
 }
 
@@ -112,8 +118,11 @@ float read_float( CharRange &range, float def )
 	if( neg_mant || range.front() == '+' )
 		++range;
 
-	if( range.empty() && !isdigit( range.front() ) )
+	if( range.empty() || !isdigit( range.front() ) )
+    {
+        eat_to_white( range );
 		return def;
+    }
 
 	while( !range.empty() && isdigit( range.front() ) )
 	{

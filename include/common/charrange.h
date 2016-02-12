@@ -48,6 +48,7 @@ inline bool operator<( CharRange const &a, CharRange const &b )
 	return std::lexicographical_compare( a.begin, a.end, b.begin, b.end );
 }
 void eat_white( CharRange &range );
+void eat_to_white( CharRange &range );
 CharRange read_line( CharRange &range );
 CharRange read_to( CharRange &range, int ch );
 CharRange read_token( CharRange &range );

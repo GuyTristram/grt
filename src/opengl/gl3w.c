@@ -93,6 +93,7 @@ static int parse_version(void)
 	if (!glGetIntegerv)
 		return -1;
 
+    printf("version %s %s\n", glGetString(GL_RENDERER), glGetString(GL_VERSION));
 	glGetIntegerv(GL_MAJOR_VERSION, &version.major);
 	glGetIntegerv(GL_MINOR_VERSION, &version.minor);
 

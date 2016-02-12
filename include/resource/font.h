@@ -9,6 +9,9 @@
 
 class Material;
 
+namespace grt
+{
+
 class Font : public Shared
 {
 public:
@@ -38,5 +41,5 @@ private:
 	int m_first_char;
 	std::vector< CharInfo > m_char_infos;
 };
-
+}
 #endif // BFONT_H

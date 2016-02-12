@@ -37,7 +37,7 @@ unsigned int next_higher_power_of_two( unsigned int v ) // compute the next high
 }
 
 
-Font::Ptr load_bdf( CharRange range, ResourcePool &pool )
+grt::Font::Ptr load_bdf( CharRange range, ResourcePool &pool )
 {
 	CharRange bitmap = read_token( range );
 
@@ -58,7 +58,7 @@ Font::Ptr load_bdf( CharRange range, ResourcePool &pool )
 	int first = read_int( range );
 	int last = read_int( range );
 
-	std::vector< Font::CharInfo > char_info;
+	std::vector< grt::Font::CharInfo > char_info;
 	char_info.resize( last - first + 1 );
 
 	int c;
@@ -84,11 +84,11 @@ Font::Ptr load_bdf( CharRange range, ResourcePool &pool )
 			char_info[c - first].advance = float( advance / float( width ) );
 		}
 	} while( c != last );
-	return Font::Ptr( new Font( font_material, float( size ), width, height, first,
+	return grt::Font::Ptr( new grt::Font( font_material, float( size ), width, height, first,
 		char_info.size(), char_info.data() ) );
 }
 
-Font::Ptr load_trd( CharRange range, ResourcePool &pool )
+grt::Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 {
 	read_int( range ); // Ignore major version
 	ignore( range, '.' );
@@ -116,7 +116,7 @@ Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 	int char_height = read_int( range ); // baseline (not used)
 	int size_hint = read_int( range );
 
-	std::vector< Font::CharInfo > char_info;
+	std::vector< grt::Font::CharInfo > char_info;
 	char_info.reserve( size_hint );
 
 	int first = 256;
@@ -141,11 +141,11 @@ Font::Ptr load_trd( CharRange range, ResourcePool &pool )
 		char_info[c].advance = float( right - left );
 		ignore( range, '\n' );
 	}
-	return Font::Ptr( new Font( font_material, float( char_height ), width, height, first,
+	return grt::Font::Ptr( new grt::Font( font_material, float( char_height ), width, height, first,
 		char_info.size() - first, &char_info[first] ) );
 }
 
-Font::Ptr load_ttf( CharRange range, int size, ResourcePool &pool )
+grt::Font::Ptr load_ttf( CharRange range, int size, ResourcePool &pool )
 {
 	const int first = 32, last = 256;
 	int x_size = 1024, y_size = 4096;
@@ -156,7 +156,7 @@ Font::Ptr load_ttf( CharRange range, int size, ResourcePool &pool )
 	                      32, last-first,          // characters to bake
 	                      chardata );             // you allocate this, it's num_chars long
 
-	Font::CharInfo char_info[last-first];
+	grt::Font::CharInfo char_info[last-first];
 
 	y_size = next_higher_power_of_two( chardata[last-first-1].y1 );
 	for( int i = 0; i < last-first; ++i )
@@ -174,7 +174,7 @@ Font::Ptr load_ttf( CharRange range, int size, ResourcePool &pool )
 	//font_material->program = shader_program( "ui.sp" );
 	font_material->program = pool.shader_program( "uifont.sp" );
 	font_material->uniforms.set( "u_texture", Texture2D::Ptr( new Texture2D( x_size, y_size, 1, &bitmap[0] ) ) );
-	return Font::Ptr( new Font( font_material, ( float )size, x_size, y_size, 32, last-first, char_info ) );
+	return grt::Font::Ptr( new grt::Font( font_material, ( float )size, x_size, y_size, 32, last-first, char_info ) );
 }
 
 #ifdef GRT_USE_FREETYPE
@@ -482,7 +482,7 @@ void ResourcePool::reload_shader_program( char const *filename )
 	return;
 }
 
-SharedPtr< Font > ResourcePool::font( char const *filename, int size )
+SharedPtr< grt::Font > ResourcePool::font( char const *filename, int size )
 {
 	auto key = std::make_pair( std::string( filename ), size );
 	auto f = m_fonts.find( key );
@@ -493,9 +493,9 @@ SharedPtr< Font > ResourcePool::font( char const *filename, int size )
 	CharRange range = file.range();
 
 	if( range.empty() )
-		return Font::Ptr();
+		return grt::Font::Ptr();
 
-	Font::Ptr new_font;
+	grt::Font::Ptr new_font;
 	if( std::string( filename ).find( ".trd" ) != std::string::npos )
 	{
 		new_font = load_trd( range, *this );

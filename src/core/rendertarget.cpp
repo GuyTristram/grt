@@ -49,9 +49,9 @@ void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type,
 	if( type == Patches )
 		glPatchParameteri( GL_PATCH_VERTICES, patch_vertices );
 	if( instances == 1 )
-		glDrawElements( gl_primitive( type ), ib.count(), GL_UNSIGNED_SHORT, ib.indices() );
+		glDrawElements( gl_primitive( type ), ib.count(), GL_UNSIGNED_INT, ib.indices() );
 	else
-		glDrawElementsInstanced( gl_primitive( type ), ib.count( ), GL_UNSIGNED_SHORT, ib.indices( ), instances );
+		glDrawElementsInstanced( gl_primitive( type ), ib.count( ), GL_UNSIGNED_INT, ib.indices( ), instances );
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	vb.unbind();
 }
@@ -65,7 +65,10 @@ void RenderTarget::draw( ShaderProgram &sp, RenderState &rs, PrimitiveType type,
 	sp.bind_textures();
 	if( type == Patches )
 		glPatchParameteri( GL_PATCH_VERTICES, patch_vertices );
-	glDrawArraysInstanced( gl_primitive( type ), 0, vb.vertex_count( ), instances );
+	if( instances == 1 )
+        glDrawArrays( gl_primitive( type ), 0, vb.vertex_count() );
+    else
+        glDrawArraysInstanced( gl_primitive( type ), 0, vb.vertex_count(), instances );
 	vb.unbind();
 }
 

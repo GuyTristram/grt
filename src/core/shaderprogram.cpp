@@ -2,6 +2,7 @@
 #include "core/vertexbuffer.h"
 #include "core/uniform.h"
 #include <cstdlib>
+#include <string.h>
 #include "opengl/opengl.h"
 
 namespace
@@ -22,7 +23,7 @@ namespace
 		{
 			GLchar *log = (GLchar *)malloc( log_length );
 			glGetShaderInfoLog( shader, log_length, &log_length, log );
-			printf( log );
+			printf( "%s", log );
 			free( log );
 		}
 		if( status == 0 )
@@ -53,7 +54,9 @@ ShaderProgram::ShaderProgram( char const *vertex_source,
 	char const *control_source,
 	char const *evaluation_source ) : m_program( 0 )
 {
+	printf( "Compiling vertex shader\n" );
 	GLuint vert_shader = compile( GL_VERTEX_SHADER, vertex_source );
+	printf( "Compiling fragment shader\n" );
 	GLuint frag_shader = compile( GL_FRAGMENT_SHADER, fragment_source );
 	GLuint geom_shader = geometry_source ? compile( GL_GEOMETRY_SHADER, geometry_source ) : 0;
 	GLuint ctrl_shader = control_source ? compile( GL_TESS_CONTROL_SHADER, control_source ) : 0;
@@ -71,6 +74,7 @@ ShaderProgram::ShaderProgram( char const *vertex_source,
 		if( eval_shader )
 			glAttachShader( m_program, eval_shader );
 
+        printf( "Linking program\n" );
 		glLinkProgram( m_program );
 
 		GLint status;
@@ -83,7 +87,7 @@ ShaderProgram::ShaderProgram( char const *vertex_source,
 			{
 				GLchar *log = (GLchar *)malloc( log_length );
 				glGetProgramInfoLog( m_program, log_length, &log_length, log );
-				printf( log );
+                printf( "%s", log );
 				free( log );
 			}
 			glDeleteProgram( m_program );

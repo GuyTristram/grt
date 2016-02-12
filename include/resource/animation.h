@@ -6,6 +6,7 @@
 #include "math/quat.h"
 
 #include <vector>
+#include <algorithm>
 
 class TextureCube;
 

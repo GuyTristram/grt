@@ -35,6 +35,9 @@ template< typename T, typename S >      vec2<T> operator*( S a, vec2<T> const &b
 template< typename T, typename S >      vec2<T> operator*( vec2<T> const &a, S b );
 template< typename T, typename S >      vec2<T> operator/( vec2<T> const &a, S b );
 
+template< typename T >                  bool operator==( vec2<T> const &a, vec2<T> const & b );
+template< typename T >                  bool operator!=( vec2<T> const &a, vec2<T> const & b );
+
 template< typename T >                  T length( vec2<T> const &v );
 template< typename T >                  vec2<T> unit( vec2<T> const &v );
 template< typename T >                  vec2<T> dot( vec2<T> const &a, vec2<T> const &b );
@@ -77,6 +80,20 @@ vec2<T> operator/( vec2<T> const &a, S b )
 {
 	return vec2<T>( a.x / b, a.y / b );
 }
+
+
+template< typename T >
+bool operator==( vec2<T> const &a, vec2<T> const & b )
+{
+	return a.x == b.x && a.y == b.y;
+}
+
+template< typename T >
+bool operator!=( vec2<T> const &a, vec2<T> const & b )
+{
+	return !( a == b );
+}
+
 
 template< typename T >
 T length( vec2<T> const &v )

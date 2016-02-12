@@ -161,7 +161,7 @@ Mesh make_quad()
 	return mesh;
 }
 
-Mesh make_text( Font const& font, char const *text )
+Mesh make_text( grt::Font const& font, char const *text )
 {
 	Mesh mesh;
 	mesh.type = RenderTarget::Triangles;

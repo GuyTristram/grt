@@ -1,7 +1,7 @@
 #include "common/valuepack.h"
 #include <cstdint>
 
-
+/*
 enum class A
 {
     A1,
@@ -45,3 +45,4 @@ void test_value_pack()
     auto a = pack2.get<1>();
 }
 
+*/

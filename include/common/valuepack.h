@@ -24,7 +24,8 @@ namespace vp_helpers
         static const size_t value = shift<I - 1, Tail...>::value +
             bits<value_pack_max<Head>::value>::value;
     };
-    template<class... Args> struct shift <0, Args...> { static const size_t value = 0; };
+    template<class Head, class... Tail> struct shift <0ul, Head, Tail...> { static const size_t value = 0; };
+    template<class... Args> struct shift <0ul, Args...> { static const size_t value = 0; };
 }
 
 /** Pack enum values, bools and integers into a single unsigned int.

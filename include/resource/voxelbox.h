@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "math/vec3.h"
+#include <float.h>
 
 template< typename T >
 class VoxelBox

@@ -28,7 +28,8 @@ public:
 
     virtual int width() const override;
     virtual int height() const override;
-
+    
+    void resize( int width, int height );
 
 private:
     virtual void do_bind() override;

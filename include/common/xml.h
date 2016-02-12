@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iterator>
 #include <string>
+#include <string.h>
 
 namespace XML
 {
