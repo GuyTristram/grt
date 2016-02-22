@@ -1,8 +1,6 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8)
 
 project(grt)
-
-
 
 include_directories(
     ./include
